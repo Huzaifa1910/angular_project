@@ -1,5 +1,5 @@
 // chat.component.ts
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -18,7 +18,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 @Component({
   selector: 'app-project-select-modal',
   standalone: true,
-  imports: [MatDialogModule, MatFormFieldModule, MatSelectModule, MatButtonModule, FormsModule],
+  imports: [MatDialogModule,CommonModule, MatFormFieldModule, MatSelectModule, MatButtonModule, FormsModule],
   template: `
     <h2 mat-dialog-title>Select Project to Chat</h2>
     <mat-dialog-content>
@@ -26,14 +26,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
         <mat-label>Select Project</mat-label>
         <mat-select [(ngModel)]="selectedProject">
           <mat-option *ngFor="let project of projects" [value]="project">
-            {{ project.nme }}
+            {{ project.name }}
           </mat-option>
         </mat-select>
       </mat-form-field>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-raised-button color="primary" 
+      <button mat-raised-button color="primary"
               [disabled]="!selectedProject"
               [mat-dialog-close]="selectedProject">Continue</button>
     </mat-dialog-actions>
@@ -44,6 +44,7 @@ export class ProjectSelectModalComponent {
   selectedProject: any;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
     this.projects = data.projects; // Assign projects from dialog data
+    console.log('Received projects:', data.projects);
   }
 }
 
@@ -71,13 +72,12 @@ export class ProjectSelectModalComponent {
     (openProfile)="openProfile()"
     (logout)="logout()" 
     [user]="user">
-    
     <div class="container" *ngIf="selectedProject; else loading">
       <!-- Main Chat Area -->
       <div class="content">
         <!-- Project Header -->
         <div class="project-header">
-          <h2>{{ selectedProject.nme }}</h2>
+          <h2>{{ selectedProject.name }}</h2>
           <div class="project-meta">
             <span><mat-icon>person</mat-icon> {{ selectedProject.leader }}</span>
             <span><mat-icon>calendar_today</mat-icon> {{ selectedProject.startDate | date }}</span>
@@ -87,14 +87,14 @@ export class ProjectSelectModalComponent {
 
         <!-- Chat Messages -->
         <div class="chat-messages">
-          <div *ngFor="let message of messages" class="message" [class.bot]="message.isBot">
+          <div *ngFor="let message of messages" class="message" [class.bot]="message.isBot" [class.user]="!message.isBot">
             <div class="message-content">
               {{ message.text }}
               <div class="timestamp">{{ message.timestamp | date:'shortTime' }}</div>
             </div>
           </div>
         </div>
-
+        
         <!-- Message Input -->
         <div class="message-input">
           <input matInput [(ngModel)]="newMessage" placeholder="Type your message...">
@@ -104,13 +104,14 @@ export class ProjectSelectModalComponent {
         </div>
       </div>
     </div>
-
+  </app-sidenav>  
+    
     <ng-template #loading>
       <div class="loading-screen">
         <mat-spinner diameter="50"></mat-spinner>
       </div>
     </ng-template>
-  </app-sidenav>
+  
   `,
   styles: [`
     /* Keep previous styles and add: */
@@ -130,27 +131,128 @@ export class ProjectSelectModalComponent {
       display: flex;
       flex-direction: column;
     }
+    .container {
+      height: calc(100vh - 64px);
+      width: 85%;
+      float: right;
+    }
+
+    .sidenav {
+      width: 300px;
+      padding: 20px;
+      background: #f5f5f5;
+      border-right: 1px solid #ddd;
+    }
+
+    .content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .project-header {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #eee;
+
+      h2 {
+        color: #0C64B6;
+        margin: 0 0 10px 0;
+      }
+
+      .project-meta {
+        display: flex;
+        gap: 20px;
+        color: #666;
+
+        mat-icon {
+          font-size: 18px;
+          vertical-align: middle;
+          margin-right: 5px;
+        }
+      }
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      background: #fafafa;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      display: flex;
+
+      &.bot {
+        justify-content: flex-start;
+
+        .message-content {
+          background: #fff;
+          border: 1px solid #ddd;
+        }
+      }
+
+      &.user {
+        justify-content: flex-end;
+
+        .message-content {
+          background: #0C64B6;
+          color: white;
+        }
+      }
+
+      .message-content {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 20px;
+        display: inline-block;
+
+        .timestamp {
+          font-size: 0.75rem;
+          opacity: 0.7;
+          margin-top: 5px;
+        }
+      }
+    }
+
+    .message-input {
+      display: flex;
+      gap: 10px;
+      border-top: 1px solid #eee;
+      padding-top: 15px;
+
+      input {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+      }
+    }
     /* Previous styles... */
   `]
 })
 export class ChatComponent implements OnInit{
   projects = [
     {
-      nme: 'AI Chatbot Development',
+      name: 'AI Chatbot Development',
       leader: 'Sarah Johnson',
       startDate: new Date('2024-01-15'),
       duration: '6 Months',
       status: 'In Progress'
     },
     {
-      nme: 'Mobile App Redesign',
+      name: 'Mobile App Redesign',
       leader: 'Michael Chen',
       startDate: new Date('2024-03-01'),
       duration: '3 Months',
       status: 'Planning'
     },
     {
-      nme: 'Cloud Migration',
+      name: 'Cloud Migration',
       leader: 'Emma Wilson',
       startDate: new Date('2024-02-10'),
       duration: '8 Months',
@@ -231,17 +333,17 @@ export class ChatComponent implements OnInit{
     const lowerMsg = message.toLowerCase();
     
     if (lowerMsg.includes('hello')) {
-      return `Hello! How can I assist you with ${this.selectedProject.nme}?`;
+      return `Hello! How can I assist you with ${this.selectedProject.name}?`;
     }
 
     if (lowerMsg.includes('status')) {
-      return `Current status of ${this.selectedProject.nme}: ${this.selectedProject.status}`;
+      return `Current status of ${this.selectedProject.name}: ${this.selectedProject.status}`;
     }
 
     if (lowerMsg.includes('team')) {
       return `The project lead is ${this.selectedProject.leader}. Would you like me to connect you with the team?`;
     }
 
-    return `Thank you for your message regarding ${this.selectedProject.nme}. Our team will respond shortly.`;
+    return `Thank you for your message regarding ${this.selectedProject.name}. Our team will respond shortly.`;
   }
 }
