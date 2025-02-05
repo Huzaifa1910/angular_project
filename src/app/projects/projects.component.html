@@ -1,0 +1,12 @@
+<div class="container">
+    <app-sidenav
+  [user]="currentUser"
+  [navItems]="customNavItems"
+  (logout)="handleLogout()">
+  <!-- Your page content here -->
+</app-sidenav>
+<app-projects-list
+  [projects]="projects"
+  title="Projects">
+</app-projects-list>
+</div>

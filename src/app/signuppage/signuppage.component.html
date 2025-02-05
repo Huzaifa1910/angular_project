@@ -1,0 +1,30 @@
+<div class="container">
+    <div class="left">
+        <img src="logo.png" alt="Logo" width="100%" class="logo">
+        <form (ngSubmit)="register(signupForm)" #signupForm="ngForm">
+            <div class="form-group">
+                <input type="text" id="businessName" name="businessName" class="capsule-input" placeholder="Business Name" required>
+            </div>
+            <div class="form-group">
+                <textarea id="businessDescription" name="businessDescription" class="capsule-input" placeholder="Business Description" required></textarea>
+            </div>
+            <div class="form-group">
+                <input type="text" id="ceoName" name="ceoName" class="capsule-input" placeholder="CEO Name" required>
+            </div>
+            <div class="form-group">
+                <input type="number" id="numberOfEmployees" name="numberOfEmployees" class="capsule-input" placeholder="Number of Employees" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="registeringEmail" name="registeringEmail" class="capsule-input" placeholder="Registering Email Address" required>
+            </div>
+            <button type="submit" class="capsule">Register</button>
+        </form>
+        <div class="separator"></div>
+        <button class="outlined" (click)="login()">Login</button>
+    </div>
+    <div class="right"></div>
+    
+    <div class="rightabsSupport">
+    </div>
+    <div class="rightabs"></div>
+</div>

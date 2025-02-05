@@ -1,0 +1,7 @@
+<!-- Any other component -->
+<app-file-list 
+  [files]="projectFiles"
+  title="Project Documents"
+  (fileSelected)="onFileSelect($event)"
+  (menuAction)="onFileAction($event)">
+</app-file-list>

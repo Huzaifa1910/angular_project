@@ -1,0 +1,102 @@
+.container {
+    display: flex;
+    height: 100vh;
+}
+.left, .right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+.left {
+    background-color: #f0f0f0;
+    position: relative;
+}
+.logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 50%; /* Adjust the size as needed */
+}
+.rightabs {
+    position: absolute;
+    right: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 42% 100%);
+    background-color: #d0d0d0;
+    width: 60vw;
+    height: 100vh;
+    box-shadow: -5px 0 10px rgba(0, 0, 0, 0.2); /* Left shadow */
+    background-image: url('/frontBuilding.png');
+    background-size: cover;
+}
+.rightabsSupport {
+    position: absolute;
+    right: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 41% 100%);
+    background-color: #0C64B6;
+    width: 61vw;
+    height: 100vh;
+    box-shadow: -5px 0 10px rgba(0, 0, 0, 0.2); /* Left shadow */
+}
+.right {
+    background-color: #f0f0f0;
+}
+.separator {
+    width: 29%;
+    height: 2px;
+    background-color: #0C64B6;
+    margin: 20px 0;
+}
+.form-group {
+    margin-bottom: 20px;
+    width: 100%;
+}
+form{
+    width: 60%;
+}
+input {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: 25px; /* Capsule shape */
+    border: 1px solid #ccc;
+    font-size: 18px;
+}
+.capsule-input {
+    padding: 20px;
+    font-size: 18px;
+    width: 100%;
+}
+button {
+    padding: 15px 20px;
+    background-color: #0C64B6;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 25px; /* Capsule shape */
+    font-size: 18px;
+    width: 100%; /* Increased width */
+}
+.capsule {
+    border-radius: 25px;
+    width: 100%; /* Capsule shape */
+}
+.outlined {
+    background-color: transparent;
+    color: #0C64B6;
+    border: 2px solid #0C64B6;
+    width: 60%; /* Increased width */
+    height: 6%;
+    border-radius: 50px;
+}
+.outlined:hover {
+    background-color: #0C64B6;
+    color: white;
+}
+a {
+    margin-top: 20px;
+    color: #0C64B6;
+    text-decoration: none;
+}

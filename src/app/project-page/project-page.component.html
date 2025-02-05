@@ -1,0 +1,29 @@
+<app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
+(openProfile)="openProfile()"
+(logout)="logout()" 
+      [user]="user">
+
+    <mat-sidenav-container class="sidenav-container">
+        <mat-sidenav-content>
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+          <!-- Stats Cards -->
+  
+          <!-- Project Cards -->
+          <app-projects-list 
+            [projects]="projects"
+            title="Ongoing Projects"
+            (projectSelected)="openProjectDetails($event)">
+          </app-projects-list>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button mat-fab color="primary" (click)="addProject()">
+                <mat-icon>add</mat-icon>
+                </button>
+                
+            </div>
+          <!-- ... action buttons ... -->
+        </div>
+          <ng-content></ng-content>
+        </mat-sidenav-content>
+      </mat-sidenav-container></app-sidenav>
