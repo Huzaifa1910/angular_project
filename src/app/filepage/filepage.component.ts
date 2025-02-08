@@ -16,6 +16,7 @@ import { MembersListComponent } from '../members/members.component';
 import { FileListComponent } from '../files/files.component';
 import { SideNavComponent } from '../sidenav/sidenav.component';
 import { Router } from '@angular/router';
+import { navItems } from '../../main';
 
 @Component({
   selector: 'app-filepage',
@@ -39,18 +40,11 @@ export class FilepageComponent {
 
   user = {
     name: 'John Doe',
-    company: 'Bubbly Corporation',
+    company: 'Knowledge Bridge Corporation',
     profileImage: ''
   };
 
-  navItems = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Projects', icon: 'folder', route: '/projects' },
-    { label: 'Members', icon: 'people', route: '/members' },
-    { label: 'Files', icon: 'description', route: '/files' },
-    // { label: 'Vector Stores', icon: 'storage', route: '/vector-stores' },
-    { label: 'Chat', icon: 'forum', route: '/chat' }
-  ];
+  navItems = navItems;
   projects = [
     {
       name: 'AI Chatbot Development',

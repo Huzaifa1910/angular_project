@@ -12,16 +12,17 @@ import { MatIconModule } from '@angular/material/icon';
 import { SideNavComponent } from '../sidenav/sidenav.component';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { navItems } from '../../main';
 // Add ProjectSelectModalComponent
 @Component({
   selector: 'app-project-select-modal',
   standalone: true,
-  imports: [MatDialogModule,CommonModule, MatFormFieldModule, MatSelectModule, MatButtonModule, FormsModule],
+  imports: [MatDialogModule,CommonModule, MatFormFieldModule, MatSelectModule, MatDialogTitle, MatButtonModule, FormsModule, MatInputModule],
   template: `
     <h2 mat-dialog-title>Select Project to Chat</h2>
-    <mat-dialog-content>
+    <mat-dialog-content class="w-full">
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Select Project</mat-label>
         <mat-select [(ngModel)]="selectedProject">
@@ -37,7 +38,23 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
               [disabled]="!selectedProject"
               [mat-dialog-close]="selectedProject">Continue</button>
     </mat-dialog-actions>
-  `
+  `,
+  styles: [`
+    .w-full {
+      width: 100%;
+    }
+    h2{
+      margin: 0 0 10px 0;
+    }
+    mat-form-field {
+      margin: 16px 0;
+      width: 100%;
+    }
+    
+    mat-dialog-content {
+      padding: 16px !important;
+    }
+  `]
 })
 export class ProjectSelectModalComponent {
   projects: any[] = [];
@@ -97,7 +114,7 @@ export class ProjectSelectModalComponent {
         
         <!-- Message Input -->
         <div class="message-input">
-          <input matInput [(ngModel)]="newMessage" placeholder="Type your message...">
+          <input matInput [(ngModel)]="newMessage"  (keyup.enter)="sendMessage()" placeholder="Type your message...">
           <button mat-icon-button (click)="sendMessage()">
             <mat-icon>send</mat-icon>
           </button>
@@ -159,6 +176,7 @@ export class ProjectSelectModalComponent {
       h2 {
         color: #0C64B6;
         margin: 0 0 10px 0;
+        padding: 10px;
       }
 
       .project-meta {
@@ -278,19 +296,12 @@ export class ChatComponent implements OnInit{
       if (selectedProject) {
         this.selectedProject = selectedProject;
       } else {
-        this.router.navigate(['/dashboard']);
+        const dashboardRoute = this.navItems[0].route;
+        this.router.navigate([dashboardRoute]);
       }
     });
   }
-  
-  navItems = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Projects', icon: 'folder', route: '/projects' },
-    { label: 'Members', icon: 'people', route: '/members' },
-    { label: 'Files', icon: 'description', route: '/files' },
-    // { label: 'Vector Stores', icon: 'storage', route: '/vector-stores' },
-    { label: 'Chat', icon: 'forum', route: '/chat' }
-  ];
+  navItems = navItems;
   selectedProject: any;
   newMessage = '';
   messages: any[] = [];
@@ -305,7 +316,7 @@ export class ChatComponent implements OnInit{
   }
   user = {
     name: 'John Doe',
-    company: 'Bubbly Corporation',
+    company: 'Knowledge Bridge Corporation',
     profileImage: ''
   };
 

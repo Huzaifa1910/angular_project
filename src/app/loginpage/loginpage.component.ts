@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgModule } from '@angular/core';
-
 import { BrowserModule } from '@angular/platform-browser';
-
 import { FormsModule } from '@angular/forms';
+
 @Component({
   imports: [FormsModule],
   selector: 'app-loginpage',
@@ -22,9 +21,30 @@ export class LoginpageComponent {
       console.log('Form Data:', form.value);
 
       // Check if the email and password are correct
-      if (form.value.email === 'contact@bubbly.com' && form.value.password === '12345678') {
-        // Navigate to the dashboard
-        this.router.navigate(['/dashboard']);
+      if (form.value.password === '12345678') {
+        // Get the role by email
+        const role = this.getRoleByEmail(form.value.email);
+        if (role) {
+          // Set the role in session storage
+          sessionStorage.setItem('userRole', role);
+
+          // Navigate accordingly based on the role
+          switch (role) {
+            case 'admin':
+              this.router.navigate(['/admin-dashboard']);
+              break;
+            case 'super-admin':
+              this.router.navigate(['/dashboard']);
+              break;
+            case 'member':
+              this.router.navigate(['/member-dashboard']);
+              break;
+            default:
+              console.log('Invalid role');
+          }
+        } else {
+          console.log('Invalid email');
+        }
       } else {
         console.log('Invalid credentials');
       }
@@ -34,5 +54,18 @@ export class LoginpageComponent {
         console.log('Register Business clicked');
         // Navigate to the desired component
         this.router.navigate(['/signup']);
+    }
+
+    // Define roles with corresponding emails
+    roles = [
+      { email: 'admin@kbc.com', role: 'admin' },
+      { email: 'superadmin@kbc.com', role: 'super-admin' },
+      { email: 'member@kbc.com', role: 'member' }
+    ];
+
+    // Function to get role by email
+    getRoleByEmail(email: string): string | undefined {
+      const user = this.roles.find(role => role.email === email);
+      return user ? user.role : undefined;
     }
 }

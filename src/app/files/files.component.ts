@@ -25,7 +25,7 @@ import { MatCardModule } from '@angular/material/card';
             </mat-icon>
             <div matListItemTitle>{{ file.name }}</div>
             <div matListItemLine class="file-meta">
-              <span>{{ file.uploader }} • {{ file.size }} • {{ file.uploadDate | date:'mediumDate' }}</span>
+              <span>{{ file.uploader }} • {{ file.size }} • {{ file.uploadDate | date:'mediumDate' }} • {{ file.project }}</span>
             </div>
           </mat-list-item>
         </mat-list>

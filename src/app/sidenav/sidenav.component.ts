@@ -6,6 +6,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sidenav',
@@ -51,7 +52,7 @@ import { RouterModule } from '@angular/router';
           </mat-nav-list>
 
           <div class="bottom-section">
-            <button mat-button (click)="openProfile.emit()">
+            <button mat-button (click)="redirectToProfile()">
               <mat-icon>person_outline</mat-icon>
               <span class="nav-label">Profile</span>
             </button>
@@ -184,6 +185,14 @@ import { RouterModule } from '@angular/router';
         mat-icon {
           color: white !important;
         }
+      }
+      &.active .nav-label {
+        color: white !important;
+      }
+
+      mat-icon {
+        margin-right: 16px;
+        transition: margin 0.3s ease;
       }
     }
 
@@ -530,4 +539,10 @@ export class SideNavComponent {
   @Output() navigate = new EventEmitter<string>();
   @Output() openProfile = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
+
+  constructor(private router: Router) {}
+
+  redirectToProfile() {
+    this.router.navigate(['/profile']);
+  }
 }

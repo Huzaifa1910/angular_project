@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-project-detail',
@@ -71,6 +72,7 @@ import { CommonModule } from '@angular/common';
 
         <mat-card-actions align="end">
           <button mat-button (click)="onClose()">Close</button>
+          <button mat-button (click)="onChat()">Chat</button>
         </mat-card-actions>
       </mat-card>
     </div>
@@ -176,7 +178,7 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class ProjectDetailComponent {
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private dialog: MatDialog) {}
 
   getFileIcon(type: string): string {
     const icons: { [key: string]: string } = {
@@ -192,6 +194,9 @@ export class ProjectDetailComponent {
 
   onClose(): void {
     // Close logic will be handled by MatDialog
-    
+    this.dialog.closeAll();
+  }
+  onChat(): void {
+    // Open chat dialog
   }
 }

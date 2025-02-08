@@ -1,0 +1,36 @@
+<app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
+(openProfile)="openProfile()"
+(logout)="logout()" 
+      [user]="user">
+
+    <mat-sidenav-container class="sidenav-container">
+        <mat-sidenav-content>
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+          <!-- Stats Cards -->
+          
+  
+          <!-- Project Cards -->
+          <app-projects-list 
+            [projects]="projects"
+            title="Assigned Projects"
+            (projectSelected)="openProjectDetails($event)">
+          </app-projects-list>
+  
+        </div>
+        <div class="dashboard-content">
+          <!-- ... existing stats and projects ... -->
+  
+          <!-- Recent Files Section -->
+          <app-file-list 
+        [files]="recentFiles"
+        title="Recent Files"
+        (fileSelected)="openFileDetails($event)"
+        (menuAction)="handleFileMenu($event)">
+      </app-file-list>
+  
+          <!-- ... action buttons ... -->
+        </div>
+          <ng-content></ng-content>
+        </mat-sidenav-content>
+      </mat-sidenav-container></app-sidenav>

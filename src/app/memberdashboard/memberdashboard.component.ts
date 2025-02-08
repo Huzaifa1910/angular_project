@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -9,7 +9,7 @@ import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { ProjectDetailComponent } from '../project-details/project-details.component';
 import { ProjectsListComponent } from '../projects/projects.component';
 import { MembersListComponent } from '../members/members.component';
@@ -20,17 +20,11 @@ import { ChatComponent } from '../chatscreen/chatscreen.component';
 import { ChatbotService } from '../chatbot.service';
 import { ChatGuard } from '../chat.guard';
 import { navItems } from '../../main';
-import { MatDialogContent } from '@angular/material/dialog';
-import { FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ChatInitFormComponent } from '../chatinitformcomponent/chatinitformcomponent.component';
-import { MatInput, MatInputModule } from '@angular/material/input';
-import { NgModule } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
 @Component({
   selector: 'app-dashboard-nav',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css'],
+  templateUrl: './memberdashboard.component.html',
+  styleUrls: ['./memberdashboard.component.css'],
   imports: [
     MatCardModule,
     MatProgressBarModule,
@@ -44,13 +38,7 @@ import { BrowserModule } from '@angular/platform-browser';
     ProjectsListComponent,
     MembersListComponent,
     FileListComponent,
-    SideNavComponent,
-    MatDialogContent,
-    MatInput,
-    MatInputModule,
-    ReactiveFormsModule,
-    FormsModule
-
+    SideNavComponent
   ],
   // template: `
   //   <app-sidenav 
@@ -462,13 +450,8 @@ import { BrowserModule } from '@angular/platform-browser';
   //   `
   // ]
 })
-export class DashboardNavComponent implements OnInit{
-  @ViewChild('addProjectDialog') addProjectDialog!: TemplateRef<any>;
-  @ViewChild('addMemberDialog') addMemberDialog!: TemplateRef<any>;
-  addProjectForm!: FormGroup;
-  addMemberForm!: FormGroup;
-  dialogRef!: MatDialogRef<any>;
-
+export class MemberdashboardComponent implements OnInit{
+  
   @ViewChild('sidenav') sidenav!: MatSidenav;
   isCollapsed = false;
   selectedRoute = '/dashboard';
@@ -480,69 +463,12 @@ export class DashboardNavComponent implements OnInit{
   };
 
   navItems = navItems;
-  
   projects = [
     {
       name: 'AI Chatbot Development',
       leader: 'Sarah Johnson',
       duration: '6 Months',
       startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'Mobile App Redesign',
-      leader: 'Michael Chen',
-      duration: '3 Months',
-      startDate: new Date('2024-06-01'),
-      status: 'ongoing'
-    },
-    {
-      name: 'Mobile App Redesign',
-      leader: 'Michael Chen',
-      duration: '3 Months',
-      startDate: new Date('2024-02-01'),
       status: 'ongoing'
     },
     {
@@ -561,40 +487,40 @@ export class DashboardNavComponent implements OnInit{
       size: '2.4 MB',
       uploader: 'Sarah Johnson',
       uploadDate: new Date('2024-05-20'),
+      project: 'AI Chatbot Development'
     },
-    
     {
       name: 'Project-Requirements.pdf',
       type: 'pdf',
       size: '2.4 MB',
       uploader: 'Sarah Johnson',
       uploadDate: new Date('2024-07-20'),
+      project: 'Mobile App Redesign'
     },
-    
     {
       name: 'Project-Requirements.pdf',
       type: 'pdf',
       size: '2.4 MB',
       uploader: 'Sarah Johnson',
       uploadDate: new Date('2024-06-20'),
+      project: 'Cloud Migration'
     },
-    
     {
       name: 'Project-Requirements.pdf',
       type: 'pdf',
       size: '2.4 MB',
       uploader: 'Sarah Johnson',
       uploadDate: new Date('2024-04-20'),
+      project: 'AI Chatbot Development'
     },
-    
     {
       name: 'Project-Requirements.pdf',
       type: 'pdf',
       size: '2.4 MB',
       uploader: 'Sarah Johnson',
       uploadDate: new Date('2024-05-20'),
+      project: 'Mobile App Redesign'
     },
-    
     // Add more files as needed
   ];
   newMembers = [
@@ -778,47 +704,24 @@ export class DashboardNavComponent implements OnInit{
     };
     return iconMap[fileType] || iconMap['default'];
   }
-  addProject() {
-    if (this.addProjectForm) {
-      this.addProjectForm.reset();
-    }
-    this.dialog.open(this.addProjectDialog);
-  }
-  addMember() {
-    if (this.addMemberForm) {
-      this.addMemberForm.reset();
-    }
-    this.dialog.open(this.addMemberDialog);
-  }
+
+
   // Add this to sort files by date
   ngOnInit() {
     this.recentFiles.sort((a, b) => 
       b.uploadDate.getTime() - a.uploadDate.getTime()
     );
-    this.addProjectForm = this.fb.group({
-
-      projectName: ['', Validators.required],
-
-      duration: ['', Validators.required],
-
-      addedBy: ['', Validators.required],
-
-      projectLeaderName: ['', Validators.required],
-
-      projectLeaderEmail: ['', [Validators.required, Validators.email]]
-
-    });
-
   }
-  
   onNavigate(route: string) {
     this.router.navigate([route]);
   }
-  createProject() {
+  addProject() {
     // Implement project creation logic
   }
 
-  
+  addMember() {
+    // Implement member addition logic
+  }
   openProfile() {
     // Implement profile dialog
   }
@@ -833,7 +736,7 @@ export class DashboardNavComponent implements OnInit{
     // Handle menu actions
     console.log('Menu action:', event.action, 'on file:', event.file);
   }
-  constructor(private fb: FormBuilder ,private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService) {
+  constructor(private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService) {
 
   }
   openProjectDetails(project: any): void {
@@ -883,36 +786,5 @@ handleProjectChat(project: any) {
       this.router.navigate(['/chat']);
     }
   });
-}
-closeModal() {
-  this.dialog.closeAll();
-}
-closeAddProjectDialog(): void {
-  this.dialog.closeAll();
-}
-closeAddMemberDialog(): void {
-  this.dialog.closeAll();
-}
-submitAddProject(): void {
-  if (this.addProjectForm.valid) {
-    const newProject = this.addProjectForm.value;
-    this.projects.push(newProject);
-    this.closeAddProjectDialog();
-  }
-  else{
-    this.closeAddProjectDialog();
-    // refresh the page
-  }
-}
-submitAddMember(): void {
-  if (this.addProjectForm.valid) {
-    const newProject = this.addProjectForm.value;
-    this.projects.push(newProject);
-    this.closeAddProjectDialog();
-  }
-  else{
-    this.closeAddProjectDialog();
-    // refresh the page
-  }
 }
 }

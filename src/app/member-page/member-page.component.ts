@@ -28,7 +28,7 @@ export class MemberPageComponent {
 
   user = {
     name: 'John Doe',
-    company: 'Bubbly Corporation',
+    company: 'Knowledge Bridge Corporation',
     profileImage: ''
   };
 
