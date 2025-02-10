@@ -26,6 +26,7 @@ const endpoints = {
   ],
   member: [
     { label: 'Dashboard', icon: 'dashboard', route: '/member-dashboard' },
+    { label: 'Projects', icon: 'folder', route: '/projects' },
     { label: 'Chat', icon: 'forum', route: '/chat' }
   ],
   guest: []

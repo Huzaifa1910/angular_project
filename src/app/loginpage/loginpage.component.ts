@@ -15,11 +15,25 @@ export class LoginpageComponent {
         console.log('Login page loaded');
     }
 
-    login(form: any) {
+    login(form: any){
       // Print all form fields in the console
       console.log('Login clicked');
       console.log('Form Data:', form.value);
-
+      var flag = false;
+      for(let i = 0; i<this.roles.length; i++){
+        var email = this.roles[i].email
+        console.log(email)
+        if(email === form.value.email){
+          flag = true; 
+          break
+        }
+        else{
+          flag = false;
+        }
+      }
+      if(!flag){
+        return alert("Invalid Email")
+      }
       // Check if the email and password are correct
       if (form.value.password === '12345678') {
         // Get the role by email
