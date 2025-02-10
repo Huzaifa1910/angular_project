@@ -47,7 +47,57 @@
           </mat-card-content>
         </mat-card>
       </div>
-
+      <ng-template #addProjectDialog>
+        <h2 mat-dialog-title class="mx-auto" style="margin: 20px auto;">Add New Project</h2>
+        
+        <mat-dialog-content>
+          <form [formGroup]="addProjectForm" (ngSubmit)="submitAddProject()">
+            <mat-form-field>
+              <mat-label>Project Name</mat-label>
+              <input matInput formControlName="projectName" required>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Duration</mat-label>
+              <input matInput formControlName="duration" required>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Added By</mat-label>
+              <input matInput formControlName="addedBy" required>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Project Leader Name</mat-label>
+              <input matInput formControlName="projectLeaderName" required>
+            </mat-form-field>
+            <div mat-dialog-actions>
+              <button mat-button type="button" (click)="closeAddProjectDialog()">Cancel</button>
+              <button mat-button type="submit" (click)="submitAddProject()">Add Project</button>
+            </div>
+          </form>
+        </mat-dialog-content>
+      </ng-template>
+        <ng-template #addMemberDialog>
+        <h2 mat-dialog-title class="mx-auto" style="margin: 20px auto;">Add New Member</h2>
+        <mat-dialog-content>
+          <form [formGroup]="addMemberForm" (ngSubmit)="submitAddMember()">
+            <mat-form-field>
+              <mat-label>Member Name</mat-label>
+              <input matInput formControlName="memberName" required>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Added By</mat-label>
+              <input matInput formControlName="addedBy" required>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Project Name</mat-label>
+              <input matInput formControlName="projectName" required>
+            </mat-form-field>
+            <div mat-dialog-actions>
+              <button mat-button type="button" (click)="closeAddMemberDialog()">Cancel</button>
+              <button mat-button type="submit" (click)="submitAddMember()">Add Member</button>
+            </div>
+          </form>
+        </mat-dialog-content>
+      </ng-template>
       <!-- Project Cards -->
       <app-projects-list 
         [projects]="projects"

@@ -47,7 +47,7 @@ export class LoginpageComponent {
             case 'admin':
               this.router.navigate(['/admin-dashboard']);
               break;
-            case 'super-admin':
+            case 'superadmin':
               this.router.navigate(['/dashboard']);
               break;
             case 'member':
@@ -73,7 +73,7 @@ export class LoginpageComponent {
     // Define roles with corresponding emails
     roles = [
       { email: 'admin@kbc.com', role: 'admin' },
-      { email: 'superadmin@kbc.com', role: 'super-admin' },
+      { email: 'superadmin@kbc.com', role: 'superadmin' },
       { email: 'member@kbc.com', role: 'member' }
     ];
 

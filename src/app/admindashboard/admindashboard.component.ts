@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -9,7 +9,7 @@ import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogContent, MatDialogRef } from '@angular/material/dialog';
 import { ProjectDetailComponent } from '../project-details/project-details.component';
 import { ProjectsListComponent } from '../projects/projects.component';
 import { MembersListComponent } from '../members/members.component';
@@ -21,6 +21,8 @@ import { ChatbotService } from '../chatbot.service';
 import { ChatGuard } from '../chat.guard';
 import { navItems } from '../../main';
 import { ChatInitFormComponent } from '../chatinitformcomponent/chatinitformcomponent.component';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatInput, MatInputModule } from '@angular/material/input';
 @Component({
   selector: 'app-dashboard-nav',
   templateUrl: './admindashboard.component.html',
@@ -38,7 +40,13 @@ import { ChatInitFormComponent } from '../chatinitformcomponent/chatinitformcomp
     ProjectsListComponent,
     MembersListComponent,
     FileListComponent,
-    SideNavComponent
+    SideNavComponent,
+    MatDialogContent,
+    MatInput,
+    MatInputModule,
+    ReactiveFormsModule,
+    FormsModule,
+    
   ],
   // template: `
   //   <app-sidenav 
@@ -451,7 +459,12 @@ import { ChatInitFormComponent } from '../chatinitformcomponent/chatinitformcomp
   // ]
 })
 export class AdmindashboardComponent implements OnInit{
-  
+   @ViewChild('addProjectDialog') addProjectDialog!: TemplateRef<any>;
+  @ViewChild('addMemberDialog') addMemberDialog!: TemplateRef<any>;
+  addProjectForm!: FormGroup;
+  addMemberForm!: FormGroup;
+  dialogRef!: MatDialogRef<any>;
+
   @ViewChild('sidenav') sidenav!: MatSidenav;
   isCollapsed = false;
   selectedRoute = '/dashboard';
@@ -768,17 +781,36 @@ export class AdmindashboardComponent implements OnInit{
     this.recentFiles.sort((a, b) => 
       b.uploadDate.getTime() - a.uploadDate.getTime()
     );
+    this.addProjectForm = this.fb.group({
+    
+          projectName: ['', Validators.required],
+    
+          duration: ['', Validators.required],
+    
+          addedBy: ['', Validators.required],
+    
+          projectLeaderName: ['', Validators.required],
+    
+          projectLeaderEmail: ['', [Validators.required, Validators.email]]
+    
+        });
   }
   onNavigate(route: string) {
     this.router.navigate([route]);
   }
   addProject() {
-    // Implement project creation logic
+    if (this.addProjectForm) {
+      this.addProjectForm.reset();
+    }
+    this.dialog.open(this.addProjectDialog);
   }
-
   addMember() {
-    // Implement member addition logic
+    if (this.addMemberForm) {
+      this.addMemberForm.reset();
+    }
+    this.dialog.open(this.addMemberDialog);
   }
+  
   openProfile() {
     // Implement profile dialog
   }
@@ -793,7 +825,7 @@ export class AdmindashboardComponent implements OnInit{
     // Handle menu actions
     console.log('Menu action:', event.action, 'on file:', event.file);
   }
-  constructor(private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService) {
+  constructor(private fb: FormBuilder, private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService) {
 
   }
   openProjectDetails(project: any): void {
@@ -843,5 +875,37 @@ handleProjectChat(project: any) {
       this.router.navigate(['/chat']);
     }
   });
+}
+
+closeModal() {
+  this.dialog.closeAll();
+}
+closeAddProjectDialog(): void {
+  this.dialog.closeAll();
+}
+closeAddMemberDialog(): void {
+  this.dialog.closeAll();
+}
+submitAddProject(): void {
+  if (this.addProjectForm.valid) {
+    const newProject = this.addProjectForm.value;
+    this.projects.push(newProject);
+    this.closeAddProjectDialog();
+  }
+  else{
+    this.closeAddProjectDialog();
+    // refresh the page
+  }
+}
+submitAddMember(): void {
+  if (this.addProjectForm.valid) {
+    const newProject = this.addProjectForm.value;
+    this.projects.push(newProject);
+    this.closeAddProjectDialog();
+  }
+  else{
+    this.closeAddProjectDialog();
+    // refresh the page
+  }
 }
 }
