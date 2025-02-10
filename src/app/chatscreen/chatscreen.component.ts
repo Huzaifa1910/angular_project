@@ -21,6 +21,7 @@ import { navItems } from '../../main';
   standalone: true,
   imports: [MatDialogModule,CommonModule, MatFormFieldModule, MatSelectModule, MatDialogTitle, MatButtonModule, FormsModule, MatInputModule],
   template: `
+  
     <h2 mat-dialog-title>Select Project to Chat</h2>
     <mat-dialog-content class="w-full">
       <mat-form-field appearance="outline" class="w-full">
@@ -85,10 +86,17 @@ export class ProjectSelectModalComponent {
     MatProgressSpinnerModule
   ],
   template: `
+  <div class="dashboardMainContainer">
+
+<div class="sidenavContainer">
   <app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
     (openProfile)="openProfile()"
     (logout)="logout()" 
     [user]="user">
+  </app-sidenav>  
+  </div>
+
+<div class="contentContainer">
     <div class="container" *ngIf="selectedProject; else loading">
       <!-- Main Chat Area -->
       <div class="content">
@@ -121,13 +129,14 @@ export class ProjectSelectModalComponent {
         </div>
       </div>
     </div>
-  </app-sidenav>  
     
     <ng-template #loading>
       <div class="loading-screen">
         <mat-spinner diameter="50"></mat-spinner>
       </div>
     </ng-template>
+    </div>
+    </div>
   
   `,
   styles: [`
@@ -138,10 +147,6 @@ export class ProjectSelectModalComponent {
       align-items: center;
       height: 100vh;
     }
-    .container {
-      height: calc(100vh - 64px);
-      display: flex;
-    }
     .content {
       flex: 1;
       padding: 20px;
@@ -150,8 +155,9 @@ export class ProjectSelectModalComponent {
     }
     .container {
       height: calc(100vh - 64px);
-      width: 85%;
+      width: 100%;
       float: right;
+      display:flex;
     }
 
     .sidenav {
@@ -250,6 +256,17 @@ export class ProjectSelectModalComponent {
         border-radius: 25px;
       }
     }
+    
+  .dashboardMainContainer{
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .contentContainer{
+    overflow-y: auto;
+    padding: 24px;
+  }
     /* Previous styles... */
   `]
 })

@@ -1,11 +1,14 @@
+<div class="dashboardMainContainer">
 
+  <div class="sidenavContainer">
 <app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
 (openProfile)="openProfile()"
 (logout)="logout()" 
       [user]="user">
+    </app-sidenav>
+  </div>
 
-    <mat-sidenav-container class="sidenav-container">
-        <mat-sidenav-content>
+  <div class="contentContainer">
                 <div class="dashboard-content">
           <!-- ... existing stats and projects ... -->
   
@@ -20,5 +23,5 @@
           <!-- ... action buttons ... -->
         </div>
           <ng-content></ng-content>
-        </mat-sidenav-content>
-      </mat-sidenav-container></app-sidenav>
+        </div>
+      </div>

@@ -1,90 +1,95 @@
-<app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
-(openProfile)="openProfile()"
-(logout)="logout()" 
-      [user]="user">
+<div class="dashboardMainContainer">
 
-    <mat-sidenav-container class="sidenav-container">
-        <mat-sidenav-content>
-        <!-- Dashboard Content -->
-        <div class="dashboard-content">
-          <!-- Stats Cards -->
-          <div class="stats-grid">
-            <mat-card class="stats-card">
-              <mat-card-header>
-                <mat-icon mat-card-avatar>storage</mat-icon>
-                <mat-card-title>Storage Used</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <h2>4.79/10 GB</h2>
-                <mat-progress-bar mode="determinate" value="47.9"></mat-progress-bar>
-                <div class="stats-status">59% remaining</div>
-              </mat-card-content>
-            </mat-card>
-  
-            <mat-card class="stats-card">
-              <mat-card-header>
-                <mat-icon mat-card-avatar>people</mat-icon>
-                <mat-card-title>Total Members</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <h2>24</h2>
-                <div class="stats-status">+3 this month</div>
-              </mat-card-content>
-            </mat-card>
-  
-            <mat-card class="stats-card">
-              <mat-card-header>
-                <mat-icon mat-card-avatar>folder</mat-icon>
-                <mat-card-title>Active Projects</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <h2>15</h2>
-                <div class="stats-status">4 overdue</div>
-              </mat-card-content>
-            </mat-card>
-          </div>
-  
-          <!-- Project Cards -->
-          <app-projects-list 
-            [projects]="projects"
-            title="Ongoing Projects"
-            (projectSelected)="openProjectDetails($event)">
-          </app-projects-list>
-  
-          <!-- Action Buttons -->
-          <div class="action-buttons">
-            <button mat-fab color="primary" (click)="addProject()">
-              <mat-icon>add</mat-icon>
-            </button>
-            <button mat-fab color="accent" (click)="addMember()">
-              <mat-icon>person_add</mat-icon>
-            </button>
-          </div>
-        </div>
-        <div class="dashboard-content">
-          <!-- ... existing sections ... -->
-  
-          <!-- New Members Section -->
-          <app-members-list 
-            [members]="newMembers"
-            title="Recently Added Members">
-          </app-members-list>
-  
-          <!-- ... action buttons ... -->
-        </div>
-        <div class="dashboard-content">
-          <!-- ... existing stats and projects ... -->
-  
-          <!-- Recent Files Section -->
-          <app-file-list 
+  <div class="sidenavContainer">
+    <app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
+    (openProfile)="openProfile()"
+    (logout)="logout()" 
+          [user]="user">
+    </app-sidenav>
+  </div>
+
+  <div class="contentContainer">
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <mat-card class="stats-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>storage</mat-icon>
+            <mat-card-title>Storage Used</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <h2>4.79/10 GB</h2>
+            <mat-progress-bar mode="determinate" value="47.9"></mat-progress-bar>
+            <div class="stats-status">59% remaining</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stats-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>people</mat-icon>
+            <mat-card-title>Total Members</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <h2>24</h2>
+            <div class="stats-status">+3 this month</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stats-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>folder</mat-icon>
+            <mat-card-title>Active Projects</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <h2>15</h2>
+            <div class="stats-status">4 overdue</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Project Cards -->
+      <app-projects-list 
+        [projects]="projects"
+        title="Ongoing Projects"
+        (projectSelected)="openProjectDetails($event)">
+      </app-projects-list>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button mat-fab color="primary" (click)="addProject()">
+          <mat-icon>add</mat-icon>
+        </button>
+        <button mat-fab color="accent" (click)="addMember()">
+          <mat-icon>person_add</mat-icon>
+        </button>
+      </div>
+    </div>
+    <div class="dashboard-content">
+      <!-- ... existing sections ... -->
+
+      <!-- New Members Section -->
+      <app-members-list 
+        [members]="newMembers"
+        title="Recently Added Members">
+      </app-members-list>
+
+      <!-- ... action buttons ... -->
+    </div>
+    <div class="dashboard-content">
+      <!-- ... existing stats and projects ... -->
+
+      <!-- Recent Files Section -->
+      <app-file-list 
         [files]="recentFiles"
         title="Recent Files"
         (fileSelected)="openFileDetails($event)"
         (menuAction)="handleFileMenu($event)">
       </app-file-list>
-  
-          <!-- ... action buttons ... -->
-        </div>
-          <ng-content></ng-content>
-        </mat-sidenav-content>
-      </mat-sidenav-container></app-sidenav>
+
+      <!-- ... action buttons ... -->
+    </div>
+    <ng-content></ng-content>
+    
+  </div>
+</div>

@@ -73,6 +73,7 @@ import { Router } from '@angular/router';
     `
     .sidenav-container {
       height: 100vh;
+      width: 100%;
       --primary-color: #0C64B6;
       --text-color: #1A1A1A;
       --hover-bg: rgba(12, 100, 182, 0.08);
@@ -93,6 +94,7 @@ import { Router } from '@angular/router';
     mat-nav-list {
       padding-top: 0;
       flex-grow: 1;
+      width: 90%;
     }
 
     mat-list-item {
@@ -167,10 +169,7 @@ import { Router } from '@angular/router';
       color: #666;
     }
 
-    mat-nav-list {
-      padding-top: 0;
-      flex-grow: 1;
-    }
+    
 
     mat-list-item {
       margin: 4px 8px;
@@ -368,10 +367,7 @@ import { Router } from '@angular/router';
       color: #666;
     }
 
-    mat-nav-list {
-      padding-top: 0;
-      flex-grow: 1;
-    }
+    
 
     mat-list-item {
       margin: 4px 8px;
@@ -518,7 +514,7 @@ import { Router } from '@angular/router';
     gap: 12px;
     margin-top: auto; /* Pushes to bottom */
     background: #fff; /* Optional: solid background */
-    position: sticky;
+    position: relative;
     bottom: 0;
     z-index: 2;
   }

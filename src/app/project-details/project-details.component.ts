@@ -81,6 +81,9 @@ import { MatDialog } from '@angular/material/dialog';
     .project-dialog {
       max-width: 800px;
       width: 100%;
+      height: 80%;
+      margin: 0 auto;
+      
       mat-card {
         padding: 24px;
       }
@@ -157,12 +160,15 @@ import { MatDialog } from '@angular/material/dialog';
 
     .documents-section {
       margin-top: 24px;
-
       h3 {
         color: #0C64B6;
         margin-bottom: 16px;
       }
+      mat-list {
+        height: 300px;
+        overflow-y: auto;
 
+      }
       .document-item {
         border-bottom: 1px solid #eee;
         &:last-child {

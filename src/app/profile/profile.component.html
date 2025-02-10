@@ -1,7 +1,15 @@
-<app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
+<div class="dashboardMainContainer">
+
+  <div class="sidenavContainer">
+    <app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
 (openProfile)="openProfile()"
 (logout)="logout()" 
     [user]="user">
+    
+</app-sidenav>
+</div>
+
+<div class="contentContainer">
 <div class="profile-container full-page">
     <div class="first-container profile-card">
         <div class="profile-header">
@@ -33,103 +41,5 @@
           </app-projects-list>
     </div>
 </div>
-
-<style>
-    .profile-container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-    .first-container, .second-container {
-        width: 100%;
-        background: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        padding: 20px;
-    }
-    .profile-header {
-        display: flex;
-        align-items: center;
-    }
-    .profile-picture {
-        margin-right: 20px;
-    }
-    .profile-picture img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-    }
-    .profile-info {
-        display: flex;
-        flex-direction: column;
-    }
-    .profile-name {
-        font-size: 1.5em;
-        font-weight: bold;
-    }
-    .profile-role {
-        font-size: 1.2em;
-        color: gray;
-    }
-    .profile-meta {
-        margin-top: 15px;
-    }
-    .meta-item {
-        display: flex;
-        align-items: center;
-        margin-top: 10px;
-    }
-    .meta-item mat-icon {
-        margin-right: 10px;
-    }
-</style>
-</app-sidenav>
-
-<style>
-  .full-page {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-  }
-  .profile-card {
-    width: 100%;
-    max-width: 70vw;
-  }
-  .profile-header {
-    display: flex;
-    align-items: center;
-  }
-  .profile-picture {
-    margin-right: 20px;
-  }
-  .profile-picture img {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-  }
-  .profile-info {
-    display: flex;
-    flex-direction: column;
-  }
-  .profile-name {
-    font-size: 2.5em;
-    font-weight: bold;
-  }
-  .profile-role {
-    font-size: 1.5em;
-    color: gray;
-  }
-  .profile-meta {
-    margin-top: 15px;
-  }
-  .meta-item {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-  }
-  .meta-item mat-icon {
-    margin-right: 10px;
-  }
-</style>
+</div>
+</div>

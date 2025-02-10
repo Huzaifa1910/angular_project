@@ -107,6 +107,41 @@ export class ProjectPageComponent {
         status: 'ongoing'
       },
       {
+        name: 'AI Chatbot Development',
+        leader: 'Sarah Johnson',
+        duration: '6 Months',
+        startDate: new Date('2024-07-15'),
+        status: 'ongoing'
+      },
+      {
+        name: 'AI Chatbot Development',
+        leader: 'Sarah Johnson',
+        duration: '6 Months',
+        startDate: new Date('2024-07-15'),
+        status: 'ongoing'
+      },
+      {
+        name: 'AI Chatbot Development',
+        leader: 'Sarah Johnson',
+        duration: '6 Months',
+        startDate: new Date('2024-07-15'),
+        status: 'ongoing'
+      },
+      {
+        name: 'AI Chatbot Development',
+        leader: 'Sarah Johnson',
+        duration: '6 Months',
+        startDate: new Date('2024-07-15'),
+        status: 'ongoing'
+      },
+      {
+        name: 'AI Chatbot Development',
+        leader: 'Sarah Johnson',
+        duration: '6 Months',
+        startDate: new Date('2024-07-15'),
+        status: 'ongoing'
+      },
+      {
         name: 'Mobile App Redesign',
         leader: 'Michael Chen',
         duration: '3 Months',

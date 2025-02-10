@@ -82,7 +82,6 @@
     .sidenav {
       width: 250px;
       transition: width 0.3s ease;
-      background: #FFFFFF;
       box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
     }
 
@@ -304,4 +303,16 @@
   .mat-sidenav-container, .mat-sidenav {
     height: 100vh;
     box-sizing: border-box;
+    background-color: none;
+  }
+  
+  .dashboardMainContainer{
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .contentContainer{
+    overflow-y: auto;
+    padding: 24px;
   }
