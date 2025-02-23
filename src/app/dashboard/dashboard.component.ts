@@ -3,6 +3,7 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
+import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
@@ -18,15 +19,16 @@ import { SideNavComponent } from '../sidenav/sidenav.component';
 import { Router } from '@angular/router';
 import { ChatComponent } from '../chatscreen/chatscreen.component';
 import { ChatbotService } from '../chatbot.service';
-import { ChatGuard } from '../chat.guard';
 import { navItems } from '../../main';
 import { MatDialogContent } from '@angular/material/dialog';
 import { FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ChatInitFormComponent } from '../chatinitformcomponent/chatinitformcomponent.component';
 import { MatInput, MatInputModule } from '@angular/material/input';
-import { NgModule } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
+import { BackendApisService } from '../backend-apis.service';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+
 @Component({
   selector: 'app-dashboard-nav',
   templateUrl: './dashboard.component.html',
@@ -49,8 +51,15 @@ import { BrowserModule } from '@angular/platform-browser';
     MatInput,
     MatInputModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    MatSelectModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule
 
+  ],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
   ],
   // template: `
   //   <app-sidenav 
@@ -468,17 +477,123 @@ export class DashboardNavComponent implements OnInit{
   addProjectForm!: FormGroup;
   addMemberForm!: FormGroup;
   dialogRef!: MatDialogRef<any>;
-
+  userRole: string = '';
+  constructor(private fb: FormBuilder, private backendapiservice: BackendApisService ,private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService) {
+  }
   @ViewChild('sidenav') sidenav!: MatSidenav;
   isCollapsed = false;
   selectedRoute = '/dashboard';
   
+  
+  getDataWithAuth() {
+    this.backendapiservice.getDataWithAuth('/get_dashboard_data').subscribe((response: any) => {
+      console.log('API response:', response);
+      if (response && response.business_data) {
+        // this.projects = response.business_data.new_projects || [];
+        var new_projects = [];
+        var new_members = [];
+        var new_docs = [];
+        // this.newMembers = response.business_data.new_employees || [];
+        for(let i=0; i<response.business_data.new_employees.length; i++){
+          var memberData: { name: string; profileImage: string; addedBy: string; project: string; addedDate: Date, role: string } = {
+            name: '',
+            profileImage: '',
+            addedBy: '',
+            project: '',
+            role: '',
+            addedDate: new Date()
+          };
+          memberData['name'] = response.business_data.new_employees[i].emp_name;
+          memberData['profileImage'] = response.business_data.new_employees[i].emp_profile_image;
+          memberData['addedBy'] = response.business_data.new_employees[i].added_by_name;
+          if (response.business_data.new_employees[i].projects.length > 0){
+            console.log(response.business_data.new_employees[i].projects)
+            memberData['project'] = response.business_data.new_employees[i].projects[0]['p_name'];
+          }
+          memberData['addedDate'] = response.business_data.new_employees[i].created_at;
+          memberData['role'] = response.business_data.new_employees[i].emp_role;
+          new_members.push(memberData);
+          // console.log(new_members);
+        }
+        this.newMembers = new_members;
+        // this.recentFiles = response.business_data.new_documents || [];
+        for (let i = 0; i < response.business_data.new_documents.length; i++) {
+          var fileData: { name: string; type: string; size: string; uploader: string; uploadDate: Date, project: string } = {
+            name: '',
+            type: '',
+            size: '',
+            uploader: '',
+            uploadDate: new Date(),
+            project: ''
+          };
+          fileData['name'] = response.business_data.new_documents[i].d_name;
+          fileData['type'] = response.business_data.new_documents[i].d_type;
+          fileData['size'] = response.business_data.new_documents[i].d_size_readable;
+          fileData['uploader'] = response.business_data.new_documents[i].uploaded_by_name;
+          fileData['uploadDate'] = response.business_data.new_documents[i].created_at;
+          fileData['project'] = response.business_data.new_documents[i].project_name;
+          new_docs.push(fileData);
+        }
+        this.recentFiles = new_docs
+        this.storageUsed = response.total_storage_used || 0;
+        this.storageRemains = response.business_data.storageRemains || 0;
+        this.totalMembers = response.employee_count || 0;
+        this.newMembersThisMonth = response.business_data.new_employees.length || 0;
+        this.activeProjects = response.project_count || 0;
+        for(let i=0; i<response.business_data.new_projects.length; i++){
+          var projectData: {id: any, name: string; leader: string; duration: string; startDate: Date; status: string } = {
+            name: '',
+            leader: '',
+            duration: '',
+            startDate: new Date(),
+            status: '',
+            id: ''
+          };
+          projectData['name'] = response.business_data.new_projects[i].p_name;
+          projectData['leader'] = response.business_data.new_projects[i].project_leader_name;
+          projectData['duration'] = response.business_data.new_projects[i].p_duration;
+          projectData['startDate'] = response.business_data.new_projects[i].start_date;
+          projectData['status'] = response.business_data.new_projects[i].status;
+          projectData['id'] = response.business_data.new_projects[i].p_id;
+          new_projects.push(projectData);
+          console.log(new_projects);
+        }
+        this.projects = new_projects;
+        this.user = {
+          name: response.business_data.user.emp_name,
+          company: response.business_data.user.b_name,
+          profileImage: response.business_data.user.profile_image
+        }
+        this.userRole = response.business_data.user.emp_role;
+        if (!response.business_data.new_projects) {
+          console.warn('No new projects available.');
+        }
+        if (!response.business_data.new_employees) {
+          console.warn('No new employees available.');
+        }
+        if (!response.business_data.new_documents) {
+          console.warn('No new documents available.');
+        }
+      } else {
+        console.error('Invalid API response.');
+      }
+    }, error => {
+      console.error('API error:', error);
+      // navigate back to /login
+      this.router.navigate(['/login']);
+    });
+  }
+
   user = {
     name: 'John Doe',
     company: 'Knowledge Bridge Corporation',
     profileImage: ''
   };
-
+  storageUsed = 0;
+  storageRemains = 0;
+  totalMembers = 24;
+  newMembersThisMonth = 3;
+  activeProjects = 15;
   navItems = navItems;
   
   projects = [
@@ -597,10 +712,28 @@ export class DashboardNavComponent implements OnInit{
     
     // Add more files as needed
   ];
+  projectLeaders = [];
+  projectOptions = [];
+  get_all_projects(){
+    this.backendapiservice.get_all_projects().subscribe((response: any) => {
+      console.log('API response:', response);
+      if (response && response.projects) {
+        this.projectOptions = response.projects;
+        console.log(this.projectOptions);
+        if (!response.projects) {
+          console.warn('No projects available.');
+        }
+      } else {
+        console.error('Invalid API response.');
+      }
+    }, error => {
+      console.error('API error:', error);
+    });
+  }
   newMembers = [
     {
       name: 'Emma Wilson',
-      1: '',
+      profileImage: '',
       addedBy: 'Sarah Johnson',
       project: 'AI Chatbot Development',
       addedDate: new Date('2024-05-20'),
@@ -681,6 +814,21 @@ export class DashboardNavComponent implements OnInit{
       addedBy: 'Alex Thompson',
       project: 'Cloud Migration',
       addedDate: new Date('2024-05-18'),
+    },
+    {
+      name: 'Sophia Martinez',
+      profileImage: '',
+      addedBy: 'Alex Thompson',
+      project: 'Cloud Migration',
+      addedDate: new Date('2024-05-18'),
+    },
+    {
+      name: 'Sophia Martinez',
+      profileImage: '',
+      addedBy: 'Alex Thompson',
+      project: 'Cloud Migration',
+      addedDate: new Date('2024-05-18'),
+      
     },
     {
       name: 'Sophia Martinez',
@@ -783,31 +931,60 @@ export class DashboardNavComponent implements OnInit{
       this.addProjectForm.reset();
     }
     this.dialog.open(this.addProjectDialog);
+    this.backendapiservice.get_all_leaders().subscribe((response: any) => {
+      console.log('API response:', response);
+      if (response && response.team_leads) {
+        this.projectLeaders = response.team_leads;
+        console.log(this.projectLeaders);
+        if (!response.leaders) {
+          console.warn('No leaders available.');
+        }
+      } else {
+        console.error('Invalid API response.');
+      }
+    }, error => {
+      console.error('API error:', error);
+    });
   }
   addMember() {
     if (this.addMemberForm) {
       this.addMemberForm.reset();
     }
     this.dialog.open(this.addMemberDialog);
+    this.get_all_projects();
   }
   // Add this to sort files by date
   ngOnInit() {
-    this.recentFiles.sort((a, b) => 
-      b.uploadDate.getTime() - a.uploadDate.getTime()
-    );
+    this.getDataWithAuth();
     this.addProjectForm = this.fb.group({
 
       projectName: ['', Validators.required],
 
-      duration: ['', Validators.required],
+      projectDescription: ['', Validators.required],
 
-      addedBy: ['', Validators.required],
+      projectDuration: ['', Validators.required],
 
-      projectLeaderName: ['', Validators.required],
+      projectLeader: ['', Validators.required],
 
-      projectLeaderEmail: ['', [Validators.required, Validators.email]]
+      projectStartDate: ['', Validators.required],
+
+      projectStatus: ['', Validators.required]
 
     });
+
+    this.addMemberForm = this.fb.group({
+      
+      memberName: ['', Validators.required],
+      
+      memberEmail: ['', Validators.required],
+
+      memberRole: ['', Validators.required],
+
+      projectName: ['']
+
+    });
+    
+    this.getDataWithAuth();
 
   }
   
@@ -833,26 +1010,65 @@ export class DashboardNavComponent implements OnInit{
     // Handle menu actions
     console.log('Menu action:', event.action, 'on file:', event.file);
   }
-  constructor(private fb: FormBuilder ,private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService) {
-
-  }
   openProjectDetails(project: any): void {
     // You would typically fetch real data here
-    const dialogData = {
-      project: project,
-      team: [
-        { name: 'Sarah Johnson', role: 'Project Lead', profileImage: '' },
-        { name: 'Michael Chen', role: 'Developer', profileImage: '' },
-        { name: 'Emma Wilson', role: 'Designer', profileImage: '' }
-      ],
-      documents: this.recentFiles.filter(f => f.type === 'pdf') // Example filter
-    };
+    this.backendapiservice.getProjectEmployees(project.id).subscribe((response: any) => {
+      console.log('API response:', response);
+      if (response && response.employees) {
+        let team_members: { name: any; role: any; }[] = []
+        let project_docs: { name: any; type: any; size: any; uploader: any; uploadDate: any; }[] = []
+        response.employees.forEach((element: any) => {
+          let member = {
+            'name': element.emp_name,
+            'role': element.emp_role,
+          }
+          team_members.push(member);
+        });
+        response.documents.forEach((element: any) => {
+          let file = {
+            'name': element.d_name,
+            'type': element.d_type,
+            'size': element.d_size,
+            'uploader': element.uploaded_by_name,
+            'uploadDate': element.created_at
+          }
+          project_docs.push(file);
+        }
+        );
+        const dialogData = {
+          project: project,
+          team: team_members,
+          documents: project_docs // Example filter
+        };
+        this.dialog.open(ProjectDetailComponent, {
+          width: '90%',
+          maxWidth: '800px',
+          data: dialogData
+        });
+      } else {
+        console.error('Invalid API response.');
+      }
+    }
+    , error => {
+      console.error('API error:', error);
+    }
+    );
+
+    // const dialogData = {
+    //   project: project,
+    //   team: [
+    //     { name: 'Sarah Johnson', role: 'Project Lead', profileImage: '' },
+    //     { name: 'Michael Chen', role: 'Developer', profileImage: '' },
+    //     { name: 'Emma Wilson', role: 'Designer', profileImage: '' }
+    //   ],
+    //   documents: this.recentFiles.filter(f => f.type === 'pdf') // Example filter
+    // };
   
-    this.dialog.open(ProjectDetailComponent, {
-      width: '90%',
-      maxWidth: '800px',
-      data: dialogData
-    });
+    // this.dialog.open(ProjectDetailComponent, {
+    //   width: '90%',
+    //   maxWidth: '800px',
+    //   data: dialogData
+    // });
   }
   // In your DashboardNavComponent
 openChat() {
@@ -894,24 +1110,71 @@ closeAddMemberDialog(): void {
   this.dialog.closeAll();
 }
 submitAddProject(): void {
-  if (this.addProjectForm.valid) {
+  if (this.addProjectForm.value.projectName && this.addProjectForm.value.projectDescription && this.addProjectForm.value.projectDuration && this.addProjectForm.value.projectLeader && this.addProjectForm.value.projectStartDate && this.addProjectForm.value.projectStatus) {
     const newProject = this.addProjectForm.value;
-    this.projects.push(newProject);
+    console.log(newProject);
+    this.backendapiservice.add_project(newProject).subscribe((response: any) => {
+      console.log('API response:', response);
+      if (response.success) {
+        console.log('Project added successfully');
+        let newProjectDetail = {
+          name: newProject.projectName,
+          leader: newProject.projectLeader,
+          duration: newProject.projectDuration,
+          startDate: newProject.projectStartDate,
+          status: newProject.projectStatus
+        }
+        this.projects.push(newProjectDetail);
+        this.closeAddProjectDialog();
+      } else {
+        console.error('Failed to add project:', response.message);
+        this.closeAddProjectDialog();
+      }
+    }, error => {
+      console.error('API error:', error);
+      alert('An error occurred while adding the project.');
+    
+    }
+    );
     this.closeAddProjectDialog();
-  }
-  else{
-    this.closeAddProjectDialog();
-    // refresh the page
+  } else {
+    console.log('Invalid form data');
+    // this.closeAddProjectDialog();
   }
 }
 submitAddMember(): void {
-  if (this.addProjectForm.valid) {
-    const newProject = this.addProjectForm.value;
-    this.projects.push(newProject);
-    this.closeAddProjectDialog();
+  if (this.addMemberForm.value.memberName && this.addMemberForm.value.memberEmail && this.addMemberForm.value.memberRole) {
+    let newMember = this.addMemberForm.value;
+    newMember['password'] = '12345678'
+    // console.log(newMember);
+    let member_option = {
+      'name': newMember.memberName,
+      'profileImage': '', // Add this line
+      'addedBy': 'Huzaifa Ghori',
+      'project': newMember.projectName,
+      'addedDate': new Date(),
+    }
+    this.newMembers.push(member_option);
+    // this.closeAddProjectDialog();
+    this.backendapiservice.add_employee(newMember).subscribe((response: any) => {
+      console.log('API response:', response);
+      if (response.success) {
+        console.log('Member added successfully');
+        console.log(response);
+        // this.newMembers.push(newMember);
+        this.closeAddMemberDialog();
+      } else {
+        console.error('Failed to add member:', response.message);
+        this.closeAddMemberDialog();
+      }
+    }, error => {
+      console.error('API error:', error);
+      alert('An error occurred while adding the member.');
+    });
   }
   else{
-    this.closeAddProjectDialog();
+    console.log("invalid form data");
+    // this.closeAddProjectDialog();
     // refresh the page
   }
 }

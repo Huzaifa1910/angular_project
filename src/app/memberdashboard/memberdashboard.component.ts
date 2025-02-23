@@ -21,6 +21,8 @@ import { ChatbotService } from '../chatbot.service';
 import { ChatGuard } from '../chat.guard';
 import { navItems } from '../../main';
 import { ChatInitFormComponent } from '../chatinitformcomponent/chatinitformcomponent.component';
+import { BackendApisService } from '../backend-apis.service';
+
 @Component({
   selector: 'app-dashboard-nav',
   templateUrl: './memberdashboard.component.html',
@@ -456,6 +458,111 @@ export class MemberdashboardComponent implements OnInit{
   isCollapsed = false;
   selectedRoute = '/dashboard';
   
+  constructor(private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService, private backendapisservice: BackendApisService) {
+
+  }
+  storageUsed = 0;
+  storageRemains = 0;
+  totalMembers = 24;
+  newMembersThisMonth = 3;
+  activeProjects = 15;
+  getDataWithAuth() {
+    this.backendapisservice.getDataWithAuth('/get_dashboard_data').subscribe((response: any) => {
+      console.log('API response:', response);
+      if (response && response.business_data) {
+        // this.projects = response.business_data.new_projects || [];
+        var new_projects = [];
+        var new_members = [];
+        var new_docs = [];
+        // this.newMembers = response.business_data.new_employees || [];
+        for(let i=0; i<response.business_data.new_employees.length; i++){
+          var memberData: { name: string; profileImage: string; addedBy: string; project: string; addedDate: Date, role: string } = {
+            name: '',
+            profileImage: '',
+            addedBy: '',
+            project: '',
+            role: '',
+            addedDate: new Date()
+          };
+          memberData['name'] = response.business_data.new_employees[i].emp_name;
+          memberData['profileImage'] = response.business_data.new_employees[i].emp_profile_image;
+          memberData['addedBy'] = response.business_data.new_employees[i].added_by_name;
+          if (response.business_data.new_employees[i].projects.length > 0){
+            console.log(response.business_data.new_employees[i].projects)
+            memberData['project'] = response.business_data.new_employees[i].projects[0]['p_name'];
+          }
+          memberData['addedDate'] = response.business_data.new_employees[i].created_at;
+          memberData['role'] = response.business_data.new_employees[i].emp_role;
+          new_members.push(memberData);
+          // console.log(new_members);
+        }
+        this.newMembers = new_members;
+        // this.recentFiles = response.business_data.new_documents || [];
+        for (let i = 0; i < response.business_data.new_documents.length; i++) {
+          var fileData: { name: string; type: string; size: string; uploader: string; uploadDate: Date, project: string } = {
+            name: '',
+            type: '',
+            size: '',
+            uploader: '',
+            uploadDate: new Date(),
+            project: ''
+          };
+          fileData['name'] = response.business_data.new_documents[i].d_name;
+          fileData['type'] = response.business_data.new_documents[i].d_type;
+          fileData['size'] = response.business_data.new_documents[i].d_size_readable;
+          fileData['uploader'] = response.business_data.new_documents[i].uploaded_by_name;
+          fileData['uploadDate'] = response.business_data.new_documents[i].created_at;
+          fileData['project'] = response.business_data.new_documents[i].project_name;
+          new_docs.push(fileData);
+        }
+        this.recentFiles = new_docs
+        this.storageUsed = response.total_storage_used || 0;
+        this.storageRemains = response.business_data.storageRemains || 0;
+        this.totalMembers = response.employee_count || 0;
+        this.newMembersThisMonth = response.business_data.new_employees.length || 0;
+        this.activeProjects = response.project_count || 0;
+        for(let i=0; i<response.business_data.new_projects.length; i++){
+          var projectData: {id: any, name: string; leader: string; duration: string; startDate: Date; status: string } = {
+            name: '',
+            leader: '',
+            duration: '',
+            startDate: new Date(),
+            status: '',
+            id: ''
+          };
+          projectData['name'] = response.business_data.new_projects[i].p_name;
+          projectData['leader'] = response.business_data.new_projects[i].project_leader_name;
+          projectData['duration'] = response.business_data.new_projects[i].p_duration;
+          projectData['startDate'] = response.business_data.new_projects[i].start_date;
+          projectData['status'] = response.business_data.new_projects[i].status;
+          projectData['id'] = response.business_data.new_projects[i].p_id;
+          new_projects.push(projectData);
+          console.log(new_projects);
+        }
+        this.projects = new_projects;
+        this.user = {
+          name: response.business_data.user.emp_name,
+          company: response.business_data.user.b_name,
+          profileImage: response.business_data.user.profile_image
+        }
+        if (!response.business_data.new_projects) {
+          console.warn('No new projects available.');
+        }
+        if (!response.business_data.new_employees) {
+          console.warn('No new employees available.');
+        }
+        if (!response.business_data.new_documents) {
+          console.warn('No new documents available.');
+        }
+      } else {
+        console.error('Invalid API response.');
+      }
+    }, error => {
+      console.error('API error:', error);
+      // navigate back to /login
+      this.router.navigate(['/login']);
+    });
+  }
   user = {
     name: 'John Doe',
     company: 'Knowledge Bridge Corporation',
@@ -711,6 +818,7 @@ export class MemberdashboardComponent implements OnInit{
     this.recentFiles.sort((a, b) => 
       b.uploadDate.getTime() - a.uploadDate.getTime()
     );
+    this.getDataWithAuth();
   }
   onNavigate(route: string) {
     this.router.navigate([route]);
@@ -735,9 +843,6 @@ export class MemberdashboardComponent implements OnInit{
   handleFileMenu(event: {file: any, action: string}) {
     // Handle menu actions
     console.log('Menu action:', event.action, 'on file:', event.file);
-  }
-  constructor(private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService) {
-
   }
   openProjectDetails(project: any): void {
     // You would typically fetch real data here

@@ -1,5 +1,4 @@
-// Create a new file: project-detail.component.ts
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -7,6 +6,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
+import { BackendApisService } from '../backend-apis.service';
 
 @Component({
   selector: 'app-project-detail',
@@ -62,11 +62,28 @@ import { MatDialog } from '@angular/material/dialog';
                 <div matListItemLine class="document-meta">
                   Uploaded {{ doc.uploadDate | date:'mediumDate' }} by {{ doc.uploadedBy }}
                 </div>
-                <button mat-icon-button>
-                  <mat-icon>download</mat-icon>
+              </mat-list-item>
+              <mat-list-item *ngFor="let doc of uploadedDocuments" class="document-item">
+                <mat-icon matListItemIcon>{{ getFileIcon(doc.type) }}</mat-icon>
+                <div matListItemTitle>{{ doc.name }}</div>
+                <div matListItemLine class="document-meta">
+                  Uploaded {{ doc.uploadDate | date:'mediumDate' }} by {{ doc.uploadedBy }}
+                </div>
+                <button mat-icon-button (click)="removeDocument(doc)">
+                  <mat-icon>delete</mat-icon>
                 </button>
               </mat-list-item>
             </mat-list>
+            <div class="upload-container" 
+                 [class.dragover]="isDragOver" 
+                 (click)="fileInput.click()"
+                 (dragover)="onDragOver($event)"
+                 (dragleave)="onDragLeave($event)"
+                 (drop)="onDrop($event)">
+              <input type="file" #fileInput (change)="onFileSelected($event)" multiple hidden>
+              <p>Drag and drop files here, or click to select files</p>
+            </div>
+            <button mat-button (click)="uploadFiles()">Upload</button>
           </div>
         </mat-card-content>
 
@@ -106,8 +123,6 @@ import { MatDialog } from '@angular/material/dialog';
         mat-icon {
           color: #0C64B6;
         }
-
-        
       }
     }
 
@@ -167,7 +182,6 @@ import { MatDialog } from '@angular/material/dialog';
       mat-list {
         height: 300px;
         overflow-y: auto;
-
       }
       .document-item {
         border-bottom: 1px solid #eee;
@@ -181,11 +195,27 @@ import { MatDialog } from '@angular/material/dialog';
         font-size: 0.8rem;
       }
     }
+
+    .upload-container {
+      border: 2px dashed #0C64B6;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .upload-container.dragover {
+      background-color: rgba(12, 100, 182, 0.1);
+    }
   `]
 })
 export class ProjectDetailComponent {
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private dialog: MatDialog) {}
+  @ViewChild('fileInput') fileInput!: ElementRef;
+  uploadedDocuments: any[] = [];
+  isDragOver = false;
 
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private dialog: MatDialog, private backendApisService: BackendApisService) {}
+  
   getFileIcon(type: string): string {
     const icons: { [key: string]: string } = {
       pdf: 'picture_as_pdf',
@@ -199,10 +229,68 @@ export class ProjectDetailComponent {
   }
 
   onClose(): void {
-    // Close logic will be handled by MatDialog
     this.dialog.closeAll();
   }
+
   onChat(): void {
     // Open chat dialog
+  }
+
+  @HostListener('dragover', ['$event'])
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = true;
+  }
+
+  @HostListener('dragleave', ['$event'])
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = false;
+  }
+
+  @HostListener('drop', ['$event'])
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = false;
+    const files: File[] = Array.from(event.dataTransfer?.files || []);
+    this.handleFiles(files);
+  }
+
+  onFileSelected(event: any): void {
+    const files: File[] = Array.from(event.target.files);
+    this.handleFiles(files);
+    this.fileInput.nativeElement.value = ''; // Reset the file input value
+  }
+
+  handleFiles(files: File[]): void {
+    files.forEach(file => {
+      this.uploadedDocuments.push({
+        name: file.name,
+        type: file.type.split('/')[1],
+        uploadDate: new Date(),
+        uploadedBy: 'You',
+        file: file
+      });
+    });
+  }
+
+  removeDocument(doc: any): void {
+    const index = this.uploadedDocuments.indexOf(doc);
+    if (index > -1) {
+      this.uploadedDocuments.splice(index, 1);
+    }
+  }
+
+  uploadFiles(): void {
+    const files = this.uploadedDocuments.map(doc => doc.file);
+    const additionalData = {
+      projectId: this.data.project.id,
+      description: 'Project documents'
+    };
+    this.backendApisService.uploadDocuments(files, additionalData).subscribe(response => {
+      console.log('Files uploaded successfully', response);
+    }, error => {
+      console.error('Error uploading files', error);
+    });
   }
 }

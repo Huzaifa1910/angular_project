@@ -6,6 +6,7 @@ import { SignuppageComponent } from "./signuppage/signuppage.component";
 
 @Component({
   selector: 'app-root',
+  standalone: true,  // ✅ Important
   imports: [RouterOutlet],
   templateUrl: './app.component.html', 
   styleUrl: './app.component.css'

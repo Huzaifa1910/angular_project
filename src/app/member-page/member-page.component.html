@@ -19,6 +19,40 @@
             </button>
           </div>
         </div>
+        <ng-template #addMemberDialog>
+          <h2 mat-dialog-title class="mx-auto" style="margin: 20px auto;">Add New Member</h2>
+          <mat-dialog-content>
+            <form [formGroup]="addMemberForm" (ngSubmit)="submitAddMember()">
+              <mat-form-field>
+                <mat-label>Member Name</mat-label>
+                <input matInput formControlName="memberName" required>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Member Email</mat-label>
+                <input matInput formControlName="memberEmail" required>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Role</mat-label>
+                <mat-select formControlName="memberRole" required>
+                <mat-option value="admin">Admin</mat-option>
+                <mat-option value="member">Member</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Project Name</mat-label>
+                <mat-select formControlName="projectName">
+                <mat-option *ngFor="let option of projectOptions" [value]="option['p_id']">
+                  {{ option['p_name'] }}
+                </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div mat-dialog-actions>
+                <button mat-button type="button" (click)="closeAddMemberDialog()">Cancel</button>
+                <button mat-button type="submit">Add Member</button>
+              </div>
+            </form>
+          </mat-dialog-content>
+        </ng-template>
         <div class="dashboard-content">
           <!-- ... existing sections ... -->
   

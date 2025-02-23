@@ -30,6 +30,10 @@ import { MatIconModule } from '@angular/material/icon';
                 <mat-icon>work</mat-icon>
                 <span>{{ member.project }}</span>
               </div>
+              <div class="meta-item">
+                <mat-icon>badge</mat-icon>
+                <span>{{ member.role }}</span>
+              </div>
             </div>
           </mat-card-content>
         </mat-card>

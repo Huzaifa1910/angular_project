@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, EventEmitter, Output } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -17,9 +17,39 @@ import { FileListComponent } from '../files/files.component';
 import { SideNavComponent } from '../sidenav/sidenav.component';
 import { Router } from '@angular/router';
 import { navItems } from '../../main';
+import { BackendApisService } from '../backend-apis.service';
+
+
+
+
+import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
+import { ChatComponent } from '../chatscreen/chatscreen.component';
+import { ChatbotService } from '../chatbot.service';
+import { MatDialogContent } from '@angular/material/dialog';
+import { FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChatInitFormComponent } from '../chatinitformcomponent/chatinitformcomponent.component';
+import { MatInput, MatInputModule } from '@angular/material/input';
+import { FormBuilder } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+
+
 @Component({
   selector: 'app-project-page',
-  imports: [ MatSidenavModule, MatListModule, MatButtonModule, MatIconModule, RouterModule, MatCardModule, MatProgressBarModule, MatMenuModule, ProjectDetailComponent, ProjectsListComponent, MembersListComponent, FileListComponent, SideNavComponent],
+  imports: [ MatSidenavModule,
+     MatListModule, 
+     MatButtonModule, 
+     MatIconModule, 
+     RouterModule, MatCardModule, 
+     MatProgressBarModule, MatMenuModule, 
+     ProjectDetailComponent, ProjectsListComponent, 
+     MembersListComponent, FileListComponent, 
+     SideNavComponent, CommonModule, MatNativeDateModule, 
+     FormsModule, ReactiveFormsModule, MatInputModule, 
+     MatSelectModule, MatDatepickerModule,
+     MatDialogContent, MatInput,
+      
+     ],
   templateUrl: './project-page.component.html',
   styleUrl: './project-page.component.css',
   template: `
@@ -43,9 +73,128 @@ import { navItems } from '../../main';
     </mat-card>
   `
 })
-export class ProjectPageComponent {
+export class ProjectPageComponent implements OnInit{
+  @ViewChild('addProjectDialog') addProjectDialog!: TemplateRef<any>;
   @Output() chatRequested = new EventEmitter<any>();
+  constructor(private dialog: MatDialog, private router: Router, private backendApisService: BackendApisService, private fb: FormBuilder) {
+    console.log('Project page loaded');
+  }
+  userRole: string = '';
+  addProjectForm!: FormGroup;
+  projectLeaders = [];
+  projectOptions = [];
+  get_projects_by_business(){
+    // Implement project fetching logic
+    this.backendApisService.get_projects_by_business().subscribe({
+      next: (response: any) => {
+        console.log('API response:', response);
+        if (response.success) {
+          var new_projects = [];
+          console.log('Projects fetched successfully');
+          console.log(response);
+          for(let i=0; i<response.projects.length; i++){
+            var projectData: {id: any, name: string; leader: string; duration: string; startDate: Date; status: string } = {
+              name: '',
+              leader: '',
+              duration: '',
+              startDate: new Date(),
+              status: '',
+              id: ''
+            };
+            projectData['name'] = response.projects[i].p_name;
+            projectData['leader'] = response.projects[i].project_leader_name;
+            projectData['duration'] = response.projects[i].p_duration;
+            projectData['startDate'] = response.projects[i].start_date;
+            projectData['status'] = response.projects[i].status;
+            projectData['id'] = response.projects[i].p_id;
+            new_projects.push(projectData);
+          }
 
+          this.projects = new_projects;
+          this.user = {
+            name: response.user.emp_name,
+            company: response.user.b_name,
+            profileImage: ''
+          }
+          this.userRole = response.user.emp_role;
+        } else {
+          console.error('Failed to fetch projects');
+        }
+      }
+    });
+
+  }
+  submitAddProject(): void {
+    if (this.addProjectForm.value.projectName && this.addProjectForm.value.projectDescription && this.addProjectForm.value.projectDuration && this.addProjectForm.value.projectLeader && this.addProjectForm.value.projectStartDate && this.addProjectForm.value.projectStatus) {
+      const newProject = this.addProjectForm.value;
+      console.log(newProject);
+      this.backendApisService.add_project(newProject).subscribe((response: any) => {
+        console.log('API response:', response);
+        if (response.success) {
+          console.log('Project added successfully');
+          let newProjectDetail = {
+            name: newProject.projectName,
+            leader: newProject.projectLeader,
+            duration: newProject.projectDuration,
+            startDate: newProject.projectStartDate,
+            status: newProject.projectStatus
+          }
+          this.projects.push(newProjectDetail);
+          this.closeAddProjectDialog();
+        } else {
+          console.error('Failed to add project:', response.message);
+          this.closeAddProjectDialog();
+        }
+      }, error => {
+        console.error('API error:', error);
+        alert('An error occurred while adding the project.');
+      
+      }
+      );
+      this.closeAddProjectDialog();
+    } else {
+      console.log('Invalid form data');
+      // this.closeAddProjectDialog();
+    }
+  }
+  ngOnInit() {
+    this.addProjectForm = this.fb.group({
+
+      projectName: ['', Validators.required],
+
+      projectDescription: ['', Validators.required],
+
+      projectDuration: ['', Validators.required],
+
+      projectLeader: ['', Validators.required],
+
+      projectStartDate: ['', Validators.required],
+
+      projectStatus: ['', Validators.required]
+
+    });
+    this.get_projects_by_business();
+  }
+  addProject() {
+    if (this.addProjectForm) {
+      this.addProjectForm.reset();
+    }
+    this.dialog.open(this.addProjectDialog);
+    this.backendApisService.get_all_leaders().subscribe((response: any) => {
+      console.log('API response:', response);
+      if (response && response.team_leads) {
+        this.projectLeaders = response.team_leads;
+        console.log(this.projectLeaders);
+        if (!response.leaders) {
+          console.warn('No leaders available.');
+        }
+      } else {
+        console.error('Invalid API response.');
+      }
+    }, error => {
+      console.error('API error:', error);
+    });
+  }
   openChat(project: any) {
     this.chatRequested.emit(project);
   }
@@ -394,10 +543,7 @@ export class ProjectPageComponent {
     onNavigate(route: string) {
       this.router.navigate([route]);
     }
-    addProject() {
-      // Implement project creation logic
-    }
-  
+    
     openProfile() {
       // Implement profile dialog
     }
@@ -414,25 +560,67 @@ export class ProjectPageComponent {
       // Handle menu actions
       console.log('Menu action:', event.action, 'on file:', event.file);
     }
-    constructor(private dialog: MatDialog, private router: Router) {
-  
+    closeAddProjectDialog(): void {
+      this.dialog.closeAll();
     }
     openProjectDetails(project: any): void {
       // You would typically fetch real data here
-      const dialogData = {
-        project: project,
-        team: [
-          { name: 'Sarah Johnson', role: 'Project Lead', profileImage: '' },
-          { name: 'Michael Chen', role: 'Developer', profileImage: '' },
-          { name: 'Emma Wilson', role: 'Designer', profileImage: '' }
-        ],
-        documents: this.recentFiles.filter(f => f.type === 'pdf') // Example filter
-      };
+      this.backendApisService.getProjectEmployees(project.id).subscribe((response: any) => {
+        console.log('API response:', response);
+        if (response && response.employees) {
+          let team_members: { name: any; role: any; }[] = []
+          let project_docs: { name: any; type: any; size: any; uploader: any; uploadDate: any; }[] = []
+          response.employees.forEach((element: any) => {
+            let member = {
+              'name': element.emp_name,
+              'role': element.emp_role,
+            }
+            team_members.push(member);
+          });
+          response.documents.forEach((element: any) => {
+            let file = {
+              'name': element.d_name,
+              'type': element.d_type,
+              'size': element.d_size,
+              'uploader': element.uploaded_by_name,
+              'uploadDate': element.created_at
+            }
+            project_docs.push(file);
+          }
+          );
+          const dialogData = {
+            project: project,
+            team: team_members,
+            documents: project_docs // Example filter
+          };
+          this.dialog.open(ProjectDetailComponent, {
+            width: '90%',
+            maxWidth: '800px',
+            data: dialogData
+          });
+        } else {
+          console.error('Invalid API response.');
+        }
+      }
+      , error => {
+        console.error('API error:', error);
+      }
+      );
+  
+      // const dialogData = {
+      //   project: project,
+      //   team: [
+      //     { name: 'Sarah Johnson', role: 'Project Lead', profileImage: '' },
+      //     { name: 'Michael Chen', role: 'Developer', profileImage: '' },
+      //     { name: 'Emma Wilson', role: 'Designer', profileImage: '' }
+      //   ],
+      //   documents: this.recentFiles.filter(f => f.type === 'pdf') // Example filter
+      // };
     
-      this.dialog.open(ProjectDetailComponent, {
-        width: '90%',
-        maxWidth: '800px',
-        data: dialogData
-      });
+      // this.dialog.open(ProjectDetailComponent, {
+      //   width: '90%',
+      //   maxWidth: '800px',
+      //   data: dialogData
+      // });
     }
 }

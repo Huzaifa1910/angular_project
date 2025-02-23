@@ -3,42 +3,43 @@ import { Router } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+import { BackendApisService } from '../backend-apis.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AuthService } from '../auth.service';
+
 
 @Component({
   imports: [FormsModule],
+  providers: [
+    BackendApisService
+  ],
   selector: 'app-loginpage',
   templateUrl: './loginpage.component.html',
   styleUrls: ['./loginpage.component.css']
 })
 export class LoginpageComponent {
-    constructor(private router: Router) {
+    constructor(private router: Router, private backendApisService: BackendApisService, private authService: AuthService) {
         console.log('Login page loaded');
     }
-
+    
     login(form: any){
       // Print all form fields in the console
       console.log('Login clicked');
       console.log('Form Data:', form.value);
-      var flag = false;
-      for(let i = 0; i<this.roles.length; i++){
-        var email = this.roles[i].email
-        console.log(email)
-        if(email === form.value.email){
-          flag = true; 
-          break
-        }
-        else{
-          flag = false;
-        }
-      }
-      if(!flag){
-        return alert("Invalid Email")
-      }
-      // Check if the email and password are correct
-      if (form.value.password === '12345678') {
-        // Get the role by email
-        const role = this.getRoleByEmail(form.value.email);
-        if (role) {
+      const payload = {
+        emp_email: form.value.email,
+        password: form.value.password
+      };
+      this.backendApisService.login(payload).subscribe({
+        next: (response: any) => {
+          console.log('API response:', response);
+          if (response.success) {
+            console.log('Login successful');
+            // consle data that should be received from the API
+            this.authService.saveUserData(response.access_token, response.emp_email);
+            const role = response.emp_role;
+            console.log(role);
+            if (role) {
           // Set the role in session storage
           sessionStorage.setItem('userRole', role);
 
@@ -47,7 +48,7 @@ export class LoginpageComponent {
             case 'admin':
               this.router.navigate(['/admin-dashboard']);
               break;
-            case 'superadmin':
+            case 'super_admin':
               this.router.navigate(['/dashboard']);
               break;
             case 'member':
@@ -56,12 +57,17 @@ export class LoginpageComponent {
             default:
               console.log('Invalid role');
           }
-        } else {
-          console.log('Invalid email');
         }
-      } else {
-        console.log('Invalid credentials');
-      }
+          } else {
+            console.error('Login failed:', response.message);
+            alert('Login failed: ' + response.message);
+          }
+        },
+        error: (error) => {
+          console.error('API error:', error);
+          alert('Login failed: ' + error.message);
+        }
+      });
     }
 
     registerBusiness() {
@@ -73,7 +79,7 @@ export class LoginpageComponent {
     // Define roles with corresponding emails
     roles = [
       { email: 'admin@kbc.com', role: 'admin' },
-      { email: 'superadmin@kbc.com', role: 'superadmin' },
+      { email: 'superadmin@kbc.com', role: 'super_admin' },
       { email: 'member@kbc.com', role: 'member' }
     ];
 

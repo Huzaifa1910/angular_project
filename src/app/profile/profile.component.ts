@@ -9,6 +9,8 @@ import { SideNavComponent } from '../sidenav/sidenav.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectDetailComponent } from '../project-details/project-details.component';
 import { ProjectsListComponent } from "../projects/projects.component";
+import { BackendApisService } from '../backend-apis.service';
+
 
 @Component({
   selector: 'app-profile',
@@ -27,7 +29,54 @@ import { ProjectsListComponent } from "../projects/projects.component";
 })
 export class ProfileComponent {
 sessionStorage: any;
-  constructor(private router: Router, private dialog: MatDialog) {}
+  constructor(private router: Router, private dialog: MatDialog, private backendapisservice : BackendApisService) {}
+  get_profile_details(){
+    this.backendapisservice.get_profile_details().subscribe({
+      next: (response: any) => {
+        console.log('API response:', response);
+        if (response.success) {
+          console.log('Profile details fetched');
+          // consle data that should be received from the API
+          let new_projects = []
+          for(let i=0; i<response.projects.length; i++){
+            var projectData: {id: any, name: string; leader: string; duration: string; startDate: Date; status: string } = {
+              name: '',
+              leader: '',
+              duration: '',
+              startDate: new Date(),
+              status: '',
+              id: ''
+            };
+            projectData['name'] = response.projects[i].p_name;
+            projectData['leader'] = response.projects[i].project_leader_name;
+            projectData['duration'] = response.projects[i].p_duration;
+            projectData['startDate'] = response.projects[i].start_date;
+            projectData['status'] = response.projects[i].status;
+            projectData['id'] = response.projects[i].p_id;
+            new_projects.push(projectData);
+            console.log(new_projects);
+          }
+          this.projects = new_projects;
+          this.user = {
+            name: response.user_details.emp_name,
+            company: response.user_details.b_name,
+            profileImage: ''
+          }
+          this.data.user = {
+            name: response.user_details.emp_name,
+            role: response.user_details.emp_role,
+            company: response.user_details.b_name,
+            email: response.user_details.emp_email,
+            project: response.user_details.p_name,
+            profilePicture: 'default-profile.jpeg'
+          }
+        }
+      }
+    });  
+  }
+  ngOnInit() {
+    this.get_profile_details();
+  }
   data = {
     user: {
       name: 'John Doe',

@@ -1,6 +1,6 @@
 // chat.component.ts
-import { Component, Inject, OnInit, NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, OnInit, NgModule, OnDestroy } from '@angular/core';
+import { CommonModule, NgIf  } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
@@ -15,6 +15,10 @@ import { Router } from '@angular/router';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { navItems } from '../../main';
+import { BackendApisService } from '../backend-apis.service';
+import { WebsocketService } from '../ws/websocket.service';
+import { marked } from 'marked';
+
 // Add ProjectSelectModalComponent
 @Component({
   selector: 'app-project-select-modal',
@@ -59,9 +63,11 @@ import { navItems } from '../../main';
 })
 export class ProjectSelectModalComponent {
   projects: any[] = [];
+  user: any;
   selectedProject: any;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
     this.projects = data.projects; // Assign projects from dialog data
+    this.user = data.user;
     console.log('Received projects:', data.projects);
   }
 }
@@ -83,8 +89,10 @@ export class ProjectSelectModalComponent {
     SideNavComponent,
     RouterModule,
     MatDialogModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    NgIf
   ],
+  providers: [BackendApisService, WebsocketService],
   template: `
   <div class="dashboardMainContainer">
 
@@ -113,8 +121,7 @@ export class ProjectSelectModalComponent {
         <!-- Chat Messages -->
         <div class="chat-messages">
           <div *ngFor="let message of messages" class="message" [class.bot]="message.isBot" [class.user]="!message.isBot">
-            <div class="message-content">
-              {{ message.text }}
+            <div class="message-content" [innerHTML]="message.text">
               <div class="timestamp">{{ message.timestamp | date:'shortTime' }}</div>
             </div>
           </div>
@@ -270,7 +277,10 @@ export class ProjectSelectModalComponent {
     /* Previous styles... */
   `]
 })
-export class ChatComponent implements OnInit{
+export class ChatComponent implements OnInit, OnDestroy {
+  // response: string = '';
+  projectId: string = '';
+
   projects = [
     {
       name: 'AI Chatbot Development',
@@ -296,13 +306,46 @@ export class ChatComponent implements OnInit{
   ];
   constructor(
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private backendapisservice: BackendApisService,
+    private websocketService: WebsocketService
   ) {}
-  ngOnInit() {
-    this.openProjectSelectModal();
+  
+  get_all_projects() {
+    this.backendapisservice.get_all_projects().subscribe((response: any) => {
+      console.log('API response:', response);
+      if (response && response.projects) {
+        let all_projects: { name: any; leader: any; startDate: any; duration: any; status: any; }[] = [];
+        response.projects.forEach((project: any) => {
+          all_projects.push({
+            name: project.p_name,
+            leader: project.p_leader,
+            startDate: project.start_date,
+            duration: project.p_duration,
+            status: project.status
+          });
+        });
+        this.projects = all_projects;
+        this.user = {
+          name: response.user.emp_name,
+          company: response.user.b_name,
+          profileImage: response.user.profile_image
+        }
+        console.log(this.projects);
+        this.openProjectSelectModal()
+      } else {
+        console.error('Invalid API response.');
+      }
+    }, error => {
+      console.error('API error:', error);
+      if (error.status === 401) {
+        this.logout(); // Handle 401 Unauthorized error
+      }
+    });
   }
 
-  openProjectSelectModal() {
+  async openProjectSelectModal() {
+    // this.get_all_projects();
     const dialogRef = this.dialog.open(ProjectSelectModalComponent, {
       width: '500px',
       disableClose: true,
@@ -312,6 +355,7 @@ export class ChatComponent implements OnInit{
     dialogRef.afterClosed().subscribe(selectedProject => {
       if (selectedProject) {
         this.selectedProject = selectedProject;
+        this.startWebSocket();
       } else {
         const dashboardRoute = this.navItems[0].route;
         this.router.navigate([dashboardRoute]);
@@ -325,6 +369,7 @@ export class ChatComponent implements OnInit{
   onNavigate(route: string) {
     this.router.navigate([route]);
   }
+  
   openProfile() {
     // Implement profile dialog
   }
@@ -337,6 +382,27 @@ export class ChatComponent implements OnInit{
     profileImage: ''
   };
 
+  startWebSocket() {
+    this.websocketService.connect(this.selectedProject.name);
+
+    setTimeout(() => {  // Ensure socket is initialized before subscribing
+      this.websocketService.getMessages().subscribe((msg) => {
+        this.messages.push(
+          {
+            text: marked(msg),
+            isBot: true,
+            timestamp: new Date()
+          }
+        ); // Add received message to array
+      });
+    }, 500);
+  }
+
+
+  stopWebSocket() {
+    this.websocketService.disconnect();
+  }
+
   sendMessage() {
     if (!this.newMessage.trim() || !this.selectedProject) return;
 
@@ -348,15 +414,32 @@ export class ChatComponent implements OnInit{
     });
 
     // Add bot response
-    this.messages.push({
-      text: this.getBotResponse(this.newMessage),
-      isBot: true,
-      timestamp: new Date()
-    });
+    // this.messages.push({
+    //   text: this.getBotResponse(this.newMessage),
+    //   isBot: true,
+    //   timestamp: new Date()
+    // });
 
+    this.websocketService.sendMessage(this.newMessage);
     this.newMessage = '';
   }
 
+  ngOnInit() {
+    this.get_all_projects(); // Ensure projects are fetched on init
+    // this.websocketService.getMessages().subscribe((msg) => {
+    //   console.log('Received:', msg);
+    //   this.messages.push({
+    //     text: msg,
+    //     isBot: true,
+    //     timestamp: new Date()
+    //   });
+    //   // this.response = msg;  // Display response in UI
+    // });
+  }
+  ngOnDestroy() {
+    // Close WebSocket connection
+    this.stopWebSocket();
+  }
   private getBotResponse(message: string): string {
     const lowerMsg = message.toLowerCase();
     

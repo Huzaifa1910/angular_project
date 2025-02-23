@@ -17,6 +17,7 @@ import { FileListComponent } from '../files/files.component';
 import { SideNavComponent } from '../sidenav/sidenav.component';
 import { Router } from '@angular/router';
 import { navItems } from '../../main';
+import { BackendApisService } from '../backend-apis.service';
 
 @Component({
   selector: 'app-filepage',
@@ -37,7 +38,44 @@ import { navItems } from '../../main';
   styleUrl: './filepage.component.css'
 })
 export class FilepageComponent {
+  constructor(private dialog: MatDialog, private router: Router, private backendApisService: BackendApisService) {
+    console.log('File page loaded');
 
+  }
+
+  get_documents(){
+    this.backendApisService.get_documents().subscribe({
+      next: (response: any) => {
+        console.log('API response:', response);
+        if (response.success) {
+          var documents = [];
+          for (let i = 0; i < response.documents.length; i++) {
+            var fileData: { name: string; type: string; size: string; uploader: string; uploadDate: Date, project: string } = {
+              name: '',
+              type: '',
+              size: '',
+              uploader: '',
+              uploadDate: new Date(),
+              project: ''
+            };
+            fileData['name'] = response.documents[i].d_name;
+            fileData['type'] = response.documents[i].d_type;
+            fileData['size'] = response.documents[i].d_size_readable;
+            fileData['uploader'] = response.documents[i].uploaded_by_name;
+            fileData['uploadDate'] = response.documents[i].created_at;
+            fileData['project'] = response.documents[i].project_name;
+            documents.push(fileData);
+          }
+          this.recentFiles = documents;
+          this.user = {
+            name: response.user.emp_name,
+            company: response.user.b_name,
+            profileImage: ''
+          }
+        }
+      }});
+    }
+    
   user = {
     name: 'John Doe',
     company: 'Knowledge Bridge Corporation',
@@ -349,6 +387,7 @@ export class FilepageComponent {
     this.recentFiles.sort((a, b) => 
       b.uploadDate.getTime() - a.uploadDate.getTime()
     );
+    this.get_documents()
   }
   onNavigate(route: string) {
     this.router.navigate([route]);
@@ -375,9 +414,7 @@ export class FilepageComponent {
     // Handle menu actions
     console.log('Menu action:', event.action, 'on file:', event.file);
   }
-  constructor(private dialog: MatDialog, private router: Router) {
-
-  }
+  
   openProjectDetails(project: any): void {
     // You would typically fetch real data here
     const dialogData = {

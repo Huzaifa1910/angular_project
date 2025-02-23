@@ -41,7 +41,7 @@
   }
 
   .project-card {
-    &.ongoing {
+    &.on-going {
       border-left: 4px solid #0C64B6;
     }
     &.delayed {
@@ -69,6 +69,7 @@
     right: 32px;
     display: flex;
     gap: 16px;
+    z-index: 2;
   }
 
     .sidenav-container {

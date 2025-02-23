@@ -15,7 +15,7 @@ import { MatIconModule } from '@angular/material/icon';
         <mat-card 
           *ngFor="let project of projects" 
           class="project-card" 
-          [class]="project.status"
+          [class]="project.status.replace(' ', '')"
           (click)="projectSelected.emit(project)"
         >
           <mat-card-header>
