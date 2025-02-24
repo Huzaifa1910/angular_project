@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -19,7 +19,7 @@ import { Router } from '@angular/router';
 import { ChatComponent } from '../chatscreen/chatscreen.component';
 import { ChatbotService } from '../chatbot.service';
 import { ChatGuard } from '../chat.guard';
-import { navItems } from '../../main';
+import { navItems, getNavigationItems } from '../../main';
 import { ChatInitFormComponent } from '../chatinitformcomponent/chatinitformcomponent.component';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatInput, MatInputModule } from '@angular/material/input';
@@ -27,7 +27,7 @@ import { BackendApisService } from '../backend-apis.service';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-dashboard-nav',
@@ -69,7 +69,7 @@ export class AdmindashboardComponent implements OnInit{
   isCollapsed = false;
   selectedRoute = '/dashboard';
 
-  constructor(private fb: FormBuilder, private backendapiservice: BackendApisService ,private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService) {
+  constructor(private fb: FormBuilder, private backendapiservice: BackendApisService ,private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService, private cdr: ChangeDetectorRef, private authService: AuthService) {
   }
   getDataWithAuth() {
     this.backendapiservice.getDataWithAuth('/get_dashboard_data').subscribe((response: any) => {
@@ -147,6 +147,8 @@ export class AdmindashboardComponent implements OnInit{
           company: response.business_data.user.b_name,
           profileImage: response.business_data.user.profile_image
         }
+        this.navItems = getNavigationItems(); // Update navigation items
+        this.cdr.detectChanges(); // Trigger change detection
         if (!response.business_data.new_projects) {
           console.warn('No new projects available.');
         }
@@ -167,8 +169,8 @@ export class AdmindashboardComponent implements OnInit{
   }
   
   user = {
-    name: 'John Doe',
-    company: 'Knowledge Bridge Corporation',
+    name: '',
+    company: '',
     profileImage: ''
   };
   storageUsed = 0;
@@ -575,6 +577,7 @@ export class AdmindashboardComponent implements OnInit{
     // Implement profile dialog
   }
   logout() {
+    this.authService.clearUserData();
     this.router.navigate(['/logout']);
   }
   openFileDetails(file: any) {

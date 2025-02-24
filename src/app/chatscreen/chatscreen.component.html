@@ -1,1 +1,54 @@
-<p>chatscreen works!</p>
+<div class="dashboardMainContainer">
+
+  <div class="sidenavContainer">
+    <app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
+      (openProfile)="openProfile()"
+      (logout)="logout()" 
+      [user]="user">
+    </app-sidenav>  
+  </div>
+
+  <div class="contentContainer">
+    <div class="container" *ngIf="selectedProject; else loading">
+      <!-- Main Chat Area -->
+      <div class="content">
+        <!-- Project Header -->
+        <div class="project-header">
+          <h2>{{ selectedProject.name }}</h2>
+          <div class="project-meta">
+            <span><mat-icon>person</mat-icon> {{ selectedProject.leader }}</span>
+            <span><mat-icon>calendar_today</mat-icon> {{ selectedProject.startDate | date }}</span>
+            <span><mat-icon>timeline</mat-icon> {{ selectedProject.duration }}</span>
+          </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-messages" #chatMessages>
+          <div *ngFor="let message of messages" class="message" [class.bot]="message.isBot" [class.user]="!message.isBot">
+            <div class="message-content" [innerHTML]="message.text">
+              <div class="timestamp">{{ message.timestamp | date:'shortTime' }}</div>
+            </div>
+          </div>
+          <div *ngIf="isTyping" class="typing-indicator">
+            <mat-progress-spinner diameter="24"></mat-progress-spinner>
+            <span>Typing...</span>
+          </div>
+        </div>
+        
+        <!-- Message Input -->
+        <div class="message-input">
+          <input matInput [(ngModel)]="newMessage"  (keyup.enter)="sendMessage()" placeholder="Type your message..." (input)="isTyping = true">
+          <button mat-icon-button (click)="sendMessage()">
+            <mat-icon>send</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <ng-template #loading>
+      <div class="loading-screen">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    </ng-template>
+  </div>
+</div>

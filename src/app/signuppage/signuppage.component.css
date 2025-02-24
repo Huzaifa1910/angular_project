@@ -114,3 +114,20 @@ a {
     color: #0C64B6;
     text-decoration: none;
 }
+::ng-deep mat-spinner circle {
+    stroke: rgb(255, 255, 255) !important;
+}
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+}
+.capsule {
+    border-radius: 25px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

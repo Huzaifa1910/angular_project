@@ -1,5 +1,5 @@
 // chat.component.ts
-import { Component, Inject, OnInit, NgModule, OnDestroy } from '@angular/core';
+import { Component, Inject, OnInit, NgModule, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, NgIf  } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -11,13 +11,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { SideNavComponent } from '../sidenav/sidenav.component';
 import { RouterModule } from '@angular/router';
-import { Router } from '@angular/router';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
+import { Router, NavigationStart } from '@angular/router';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogTitle, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { navItems } from '../../main';
+import { navItems, getNavigationItems } from '../../main';
 import { BackendApisService } from '../backend-apis.service';
 import { WebsocketService } from '../ws/websocket.service';
 import { marked } from 'marked';
+import { ActivatedRoute } from '@angular/router';
+import { interval, Subscription } from 'rxjs';
+import { AuthService } from '../auth.service';
 
 // Add ProjectSelectModalComponent
 @Component({
@@ -68,6 +71,7 @@ export class ProjectSelectModalComponent {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
     this.projects = data.projects; // Assign projects from dialog data
     this.user = data.user;
+    
     console.log('Received projects:', data.projects);
   }
 }
@@ -119,7 +123,7 @@ export class ProjectSelectModalComponent {
         </div>
 
         <!-- Chat Messages -->
-        <div class="chat-messages">
+        <div class="chat-messages" #chatMessages>
           <div *ngFor="let message of messages" class="message" [class.bot]="message.isBot" [class.user]="!message.isBot">
             <div class="message-content" [innerHTML]="message.text">
               <div class="timestamp">{{ message.timestamp | date:'shortTime' }}</div>
@@ -281,34 +285,21 @@ export class ChatComponent implements OnInit, OnDestroy {
   // response: string = '';
   projectId: string = '';
 
-  projects = [
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      startDate: new Date('2024-01-15'),
-      duration: '6 Months',
-      status: 'In Progress'
-    },
-    {
-      name: 'Mobile App Redesign',
-      leader: 'Michael Chen',
-      startDate: new Date('2024-03-01'),
-      duration: '3 Months',
-      status: 'Planning'
-    },
-    {
-      name: 'Cloud Migration',
-      leader: 'Emma Wilson',
-      startDate: new Date('2024-02-10'),
-      duration: '8 Months',
-      status: 'In Progress'
-    }
-  ];
+  projects: { name: string; leader: string; startDate: Date; duration: string; status: string; }[] = [];
+  private projectCheckSubscription: Subscription | undefined;
+  private dialogRef: MatDialogRef<ProjectSelectModalComponent> | undefined;
+  @ViewChild('chatMessages') private chatMessagesContainer!: ElementRef;
+  isTyping = false;
+  routerEventsSubscription: any;
+
   constructor(
     private router: Router,
     private dialog: MatDialog,
     private backendapisservice: BackendApisService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) {}
   
   get_all_projects() {
@@ -319,7 +310,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         response.projects.forEach((project: any) => {
           all_projects.push({
             name: project.p_name,
-            leader: project.p_leader,
+            leader: project.project_leader_name,
             startDate: project.start_date,
             duration: project.p_duration,
             status: project.status
@@ -345,20 +336,29 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   async openProjectSelectModal() {
-    // this.get_all_projects();
-    const dialogRef = this.dialog.open(ProjectSelectModalComponent, {
+    if (this.selectedProject) {
+      return; // If a project is already selected, do not show the modal
+    }
+    let projectName = '';
+    this.dialogRef = this.dialog.open(ProjectSelectModalComponent, {
       width: '500px',
       disableClose: true,
       data: { projects: this.projects } // Pass projects data here
     });
-  
-    dialogRef.afterClosed().subscribe(selectedProject => {
+   this.route.queryParams.subscribe(params => {
+      projectName = params['projectName'];    
+  })
+
+    this.dialogRef.afterClosed().subscribe(selectedProject => {
       if (selectedProject) {
         this.selectedProject = selectedProject;
         this.startWebSocket();
       } else {
+        
+        if(projectName == ''){
         const dashboardRoute = this.navItems[0].route;
         this.router.navigate([dashboardRoute]);
+        }
       }
     });
   }
@@ -374,19 +374,27 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Implement profile dialog
   }
   logout() {
+    this.authService.clearUserData();
     this.router.navigate(['/logout']);
   }
   user = {
-    name: 'John Doe',
-    company: 'Knowledge Bridge Corporation',
+    name: '',
+    company: '',
     profileImage: ''
   };
 
   startWebSocket() {
+    this.messages.push({
+      text: marked('_Typing..._'),
+      isBot: true,
+      timestamp: new Date()
+    });
     this.websocketService.connect(this.selectedProject.name);
 
     setTimeout(() => {  // Ensure socket is initialized before subscribing
       this.websocketService.getMessages().subscribe((msg) => {
+        this.isTyping = false; // Hide typing indicator
+        this.messages.pop(); // Remove typing indicator
         this.messages.push(
           {
             text: marked(msg),
@@ -394,6 +402,9 @@ export class ChatComponent implements OnInit, OnDestroy {
             timestamp: new Date()
           }
         ); // Add received message to array
+        setTimeout(() => {
+          this.scrollToBottom(); // Scroll to the latest message
+        }, 500);
       });
     }, 500);
   }
@@ -413,32 +424,73 @@ export class ChatComponent implements OnInit, OnDestroy {
       timestamp: new Date()
     });
 
-    // Add bot response
-    // this.messages.push({
-    //   text: this.getBotResponse(this.newMessage),
-    //   isBot: true,
-    //   timestamp: new Date()
-    // });
-
     this.websocketService.sendMessage(this.newMessage);
     this.newMessage = '';
+    this.isTyping = true; // Show typing indicator
+    this.messages.push({
+      text: marked('_Typing..._'),
+      isBot: true,
+      timestamp: new Date()
+    });
+    setTimeout(() => {
+      this.scrollToBottom(); // Scroll to the latest message
+    }, 500);
+  }
+
+  scrollToBottom(): void {
+    try {
+      this.chatMessagesContainer.nativeElement.scrollTo({
+        top: this.chatMessagesContainer.nativeElement.scrollHeight,
+        behavior: 'smooth'
+      });
+    } catch (err) {
+      console.error('Scroll to bottom failed:', err);
+    }
   }
 
   ngOnInit() {
     this.get_all_projects(); // Ensure projects are fetched on init
-    // this.websocketService.getMessages().subscribe((msg) => {
-    //   console.log('Received:', msg);
-    //   this.messages.push({
-    //     text: msg,
-    //     isBot: true,
-    //     timestamp: new Date()
-    //   });
-    //   // this.response = msg;  // Display response in UI
-    // });
+    
+    // Check if projectName exists in the URL
+    this.route.queryParams.subscribe(params => {
+      const projectName = params['projectName'];
+      if (projectName) {
+        this.projectCheckSubscription = interval(500).subscribe(() => {
+          if (this.projects.length > 0) {
+            this.initiateChatWithProject(projectName);
+            this.projectCheckSubscription?.unsubscribe();
+          }
+        });
+      }
+    });
+
+    // Subscribe to router events to detect navigation away from the component
+    this.routerEventsSubscription = this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        this.stopWebSocket(); // Close WebSocket connection when navigating away
+      }
+    });
   }
+
+  initiateChatWithProject(projectName: string) {
+    console.log(this.projects);
+
+    const selectedProject = this.projects.find(project => project.name === projectName);
+    if (selectedProject) {
+      this.selectedProject = selectedProject;
+      this.startWebSocket();
+      this.dialogRef?.close(); // Close the modal if it is open
+    } else {
+      console.error('Project not found:', projectName);
+    }
+  }
+
   ngOnDestroy() {
     // Close WebSocket connection
     this.stopWebSocket();
+    this.projectCheckSubscription?.unsubscribe(); // Unsubscribe from project check
+    this.routerEventsSubscription?.unsubscribe(); // Unsubscribe from router events
+    console.log('ChatComponent destroyed');
   }
   private getBotResponse(message: string): string {
     const lowerMsg = message.toLowerCase();

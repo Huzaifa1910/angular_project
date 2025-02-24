@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -16,8 +16,10 @@ import { MembersListComponent } from '../members/members.component';
 import { FileListComponent } from '../files/files.component';
 import { SideNavComponent } from '../sidenav/sidenav.component';
 import { Router } from '@angular/router';
-import { navItems } from '../../main';
+import { navItems, getNavigationItems} from '../../main';
 import { BackendApisService } from '../backend-apis.service';
+import { AuthService } from '../auth.service';
+
 
 @Component({
   selector: 'app-filepage',
@@ -38,7 +40,7 @@ import { BackendApisService } from '../backend-apis.service';
   styleUrl: './filepage.component.css'
 })
 export class FilepageComponent {
-  constructor(private dialog: MatDialog, private router: Router, private backendApisService: BackendApisService) {
+  constructor(private dialog: MatDialog, private router: Router, private backendApisService: BackendApisService, private cdr: ChangeDetectorRef,  private authService: AuthService) {
     console.log('File page loaded');
 
   }
@@ -72,13 +74,15 @@ export class FilepageComponent {
             company: response.user.b_name,
             profileImage: ''
           }
+          this.navItems = getNavigationItems(); // Update navigation items
+          this.cdr.detectChanges(); // Trigger change detection
         }
       }});
     }
     
   user = {
-    name: 'John Doe',
-    company: 'Knowledge Bridge Corporation',
+    name: '',
+    company: '',
     profileImage: ''
   };
 
@@ -404,6 +408,7 @@ export class FilepageComponent {
   }
 
   logout() {
+    this.authService.clearUserData();
     this.router.navigate(['/logout']);
   }
   openFileDetails(file: any) {

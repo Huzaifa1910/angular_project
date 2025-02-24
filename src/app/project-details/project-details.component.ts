@@ -233,7 +233,9 @@ export class ProjectDetailComponent {
   }
 
   onChat(): void {
-    // Open chat dialog
+    const projectName = this.data.project.name;
+    this.dialog.closeAll();
+    window.location.href = `/chat?projectName=${projectName}`;
   }
 
   @HostListener('dragover', ['$event'])

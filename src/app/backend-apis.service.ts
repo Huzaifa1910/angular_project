@@ -187,4 +187,41 @@ export class BackendApisService {
       })
     );
   }
+
+
+  edit_employee(emp_id: number, payload: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/api/employees/${emp_id}/edit`, payload, this.getAuthHeaders()).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          // Handle 401 Unauthorized error
+          this.router.navigate(['/logout']);
+        }
+        return throwError(error);
+      })
+    );
+  }
+
+  delete_employee(emp_id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/api/employees/${emp_id}`, this.getAuthHeaders()).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          // Handle 401 Unauthorized error
+          this.router.navigate(['/logout']);
+        }
+        return throwError(error);
+      })
+    );
+  }
+
+  change_password(payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/employee/change-password`, payload, this.getAuthHeaders()).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          // Handle 401 Unauthorized error
+          this.router.navigate(['/logout']);
+        }
+        return throwError(error);
+      })
+    );
+  }
 }

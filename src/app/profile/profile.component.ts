@@ -1,15 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, ViewChild, TemplateRef } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { navItems } from '../../main';
+import { navItems, getNavigationItems } from '../../main';
 import { SideNavComponent } from '../sidenav/sidenav.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ProjectDetailComponent } from '../project-details/project-details.component';
 import { ProjectsListComponent } from "../projects/projects.component";
 import { BackendApisService } from '../backend-apis.service';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialogContent } from '@angular/material/dialog';
+import { MatInputModule } from '@angular/material/input';
+import { AuthService } from '../auth.service';
 
 
 @Component({
@@ -22,14 +27,37 @@ import { BackendApisService } from '../backend-apis.service';
     SideNavComponent,
     MatIconModule,
     ProjectDetailComponent,
-    ProjectsListComponent
-],
+    ProjectsListComponent,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDialogContent
+  ],
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component.css',
+  styleUrls: ['./profile.component.css'],
 })
 export class ProfileComponent {
-sessionStorage: any;
-  constructor(private router: Router, private dialog: MatDialog, private backendapisservice : BackendApisService) {}
+  @ViewChild('changePasswordDialog') changePasswordDialog!: TemplateRef<any>;
+  changePasswordForm!: FormGroup;
+  dialogRef!: MatDialogRef<any>;
+
+  sessionStorage: any;
+  constructor(
+    private router: Router,
+    private dialog: MatDialog,
+    private backendapisservice: BackendApisService,
+    private cdr: ChangeDetectorRef,
+    private fb: FormBuilder,
+    private authService: AuthService
+  ) {
+    this.changePasswordForm = this.fb.group({
+      currentPassword: ['', Validators.required],
+      newPassword: ['', Validators.required],
+      confirmNewPassword: ['', Validators.required]
+    });
+  }
+
   get_profile_details(){
     this.backendapisservice.get_profile_details().subscribe({
       next: (response: any) => {
@@ -62,6 +90,8 @@ sessionStorage: any;
             company: response.user_details.b_name,
             profileImage: ''
           }
+          this.navItems = getNavigationItems(); // Update navigation items
+    this.cdr.detectChanges(); // Trigger change detection
           this.data.user = {
             name: response.user_details.emp_name,
             role: response.user_details.emp_role,
@@ -143,12 +173,13 @@ sessionStorage: any;
     // Implement profile dialog
   }
   user = {
-    name: 'John Doe',
-    company: 'Knowledge Bridge Corporation',
+    name: '',
+    company: '',
     profileImage: ''
   };
   navItems = navItems;
   logout() {
+    this.authService.clearUserData();
     this.router.navigate(['/logout']);
   }
   onNavigate(route: string) {
@@ -157,5 +188,39 @@ sessionStorage: any;
   onChangePicture(): void {
     // Logic to change profile picture
     console.log('Change profile picture');
+  }
+
+  openChangePasswordDialog() {
+    this.dialogRef = this.dialog.open(this.changePasswordDialog);
+  }
+
+  submitChangePassword() {
+    if (this.changePasswordForm.valid) {
+      const { currentPassword, newPassword, confirmNewPassword } = this.changePasswordForm.value;
+      if (newPassword === confirmNewPassword) {
+        console.log('Password changed');
+        // Implement the actual password change logic here
+        let payload = {
+          old_password: currentPassword,
+          new_password: newPassword
+        };
+        this.backendapisservice.change_password(payload).subscribe({
+          next: (response: any) => {
+            console.log('API response:', response);
+            if (response.success) {
+              console.log('Password changed successfully');
+              alert('Password changed successfully');
+              this.dialogRef.close();
+            } else {
+              console.error('Password change failed:', response.message);
+              alert('Password change failed: ' + response.message);
+            }
+          }
+        });
+      } else {
+        alert('New password and confirm new password do not match');
+        console.error('New password and confirm new password do not match');
+      }
+    }
   }
 }

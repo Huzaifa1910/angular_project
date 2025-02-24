@@ -7,6 +7,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { AuthService } from '../auth.service';
+
 
 @Component({
   selector: 'app-sidenav',
@@ -17,7 +20,8 @@ import { Router } from '@angular/router';
     MatListModule,
     MatButtonModule,
     MatIconModule,
-    RouterModule
+    RouterModule,
+    MatProgressBarModule
   ],
   template: `
     <mat-sidenav-container class="sidenav-container">
@@ -33,10 +37,14 @@ import { Router } from '@angular/router';
                 {{ user.name.charAt(0) }}
               </div>
             </div>
-            <div class="profile-info">
+            <div class="profile-info"  *ngIf="user else: bufferbar"> 
               <h3 class="username">{{ user.name }}</h3>
               <p class="company">{{ user.company }}</p>
             </div>
+            <ng-template #bufferbar>
+              <mat-progress-bar mode="buffer"></mat-progress-bar>
+              <mat-progress-bar mode="buffer"></mat-progress-bar>
+            </ng-template>
           </div>
 
           <mat-nav-list>
@@ -536,7 +544,7 @@ export class SideNavComponent {
   @Output() openProfile = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
 
-  constructor(private router: Router) {}
+  constructor(private router: Router,  private authService: AuthService) {}
 
   redirectToProfile() {
     this.router.navigate(['/profile']);

@@ -6,6 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { BackendApisService } from '../backend-apis.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-signuppage',
@@ -15,7 +17,9 @@ import { BackendApisService } from '../backend-apis.service';
     CommonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    NgIf
   ],
   providers: [
     BackendApisService
@@ -27,13 +31,14 @@ export class SignuppageComponent {
   constructor(private router: Router, private backendApisService: BackendApisService) {
     console.log('Signup page loaded');
   }
-
+  isLoading = false;
   login() {
     console.log('login clicked');
     this.router.navigate(['/login']);
   }
 
   register(form: any) {
+    this.isLoading = true;
     console.log('register clicked');
     const payload = {
       b_name: form.value.businessName,
@@ -46,7 +51,9 @@ export class SignuppageComponent {
     this.backendApisService.register(payload).subscribe({
       next: (response: any) => {
         if (response.success) {
+          this.isLoading = false;
           console.log('Business registered successfully');
+          alert('Business registered successfully');
           this.router.navigate(['/login']);
         } else {
           console.error('Registration failed:', response.message);
@@ -54,6 +61,7 @@ export class SignuppageComponent {
         }
       },
       error: (error) => {
+        this.isLoading = false;
         console.error('API error:', error);
         alert('An error occurred while registering the business.');
       }

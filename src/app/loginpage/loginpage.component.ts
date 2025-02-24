@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component,  } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -6,10 +6,11 @@ import { FormsModule } from '@angular/forms';
 import { BackendApisService } from '../backend-apis.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../auth.service';
-
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NgIf } from '@angular/common';
 
 @Component({
-  imports: [FormsModule],
+  imports: [FormsModule, MatProgressSpinnerModule, NgIf],
   providers: [
     BackendApisService
   ],
@@ -18,56 +19,62 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./loginpage.component.css']
 })
 export class LoginpageComponent {
+    isLoading = false;
+
     constructor(private router: Router, private backendApisService: BackendApisService, private authService: AuthService) {
         console.log('Login page loaded');
     }
     
     login(form: any){
-      // Print all form fields in the console
-      console.log('Login clicked');
-      console.log('Form Data:', form.value);
-      const payload = {
-        emp_email: form.value.email,
-        password: form.value.password
-      };
-      this.backendApisService.login(payload).subscribe({
-        next: (response: any) => {
-          console.log('API response:', response);
-          if (response.success) {
-            console.log('Login successful');
-            // consle data that should be received from the API
-            this.authService.saveUserData(response.access_token, response.emp_email);
-            const role = response.emp_role;
-            console.log(role);
-            if (role) {
-          // Set the role in session storage
-          sessionStorage.setItem('userRole', role);
-
-          // Navigate accordingly based on the role
-          switch (role) {
-            case 'admin':
-              this.router.navigate(['/admin-dashboard']);
-              break;
-            case 'super_admin':
-              this.router.navigate(['/dashboard']);
-              break;
-            case 'member':
-              this.router.navigate(['/member-dashboard']);
-              break;
-            default:
-              console.log('Invalid role');
+      if (form.valid) {
+        this.isLoading = true;
+        console.log('Login clicked');
+        console.log('Form Data:', form.value);
+        const payload = {
+          emp_email: form.value.email,
+          password: form.value.password
+        };
+        this.backendApisService.login(payload).subscribe({
+          next: (response: any) => {
+            this.isLoading = false;
+            console.log('API response:', response);
+            if (response.success) {
+              console.log('Login successful');
+              // consle data that should be received from the API
+              this.authService.saveUserData(response.access_token, response.emp_email);
+              const role = response.emp_role;
+              console.log(role);
+              if (role) {
+            // Set the role in session storage
+            sessionStorage.setItem('userRole', role);
+  
+            // Navigate accordingly based on the role
+            switch (role) {
+              case 'admin':
+                this.router.navigate(['/admin-dashboard']);
+                break;
+              case 'super_admin':
+                this.router.navigate(['/dashboard']);
+                break;
+              case 'member':
+                this.router.navigate(['/member-dashboard']);
+                break;
+              default:
+                console.log('Invalid role');
+            }
           }
-        }
-          } else {
-            console.error('Login failed:', response.message);
-            alert('Login failed: ' + response.message);
+            } else {
+              console.error('Login failed:', response.message);
+              alert('Login failed: ' + response.message);
+            }
+          },
+          error: (error) => {
+            this.isLoading = false;
+            console.error('API error:', error);
+            alert('Login failed: ' + error.error.message);
           }
-        },
-        error: (error) => {
-          console.error('API error:', error);
-          alert('Login failed: ' + error.message);
-        }
-      });
+        });
+      }
     }
 
     registerBusiness() {

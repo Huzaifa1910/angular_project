@@ -6,9 +6,6 @@
                 <input type="text" id="businessName" name="businessName" class="capsule-input" placeholder="Business Name" ngModel required>
             </div>
             <div class="form-group">
-                <textarea id="businessDescription" name="businessDescription" class="capsule-input" placeholder="Business Description" ngModel required></textarea>
-            </div>
-            <div class="form-group">
                 <input type="text" id="ceoName" name="ceoName" class="capsule-input" placeholder="CEO Name" ngModel required>
             </div>
             <div class="form-group">
@@ -23,7 +20,9 @@
             <div class="form-group">
                 <input type="password" id="pwd" name="pwd" class="capsule-input" placeholder="Password" ngModel required>
             </div>
-            <button type="submit" class="capsule">Register</button>
+            <button type="submit" class="capsule" [disabled]="isLoading">
+                <ng-container *ngIf="!isLoading; else loadingTemplate" class="center">Register</ng-container>
+            </button>
         </form>
         <div class="separator"></div>
         <button class="outlined" (click)="login()">Login</button>
@@ -33,4 +32,7 @@
     <div class="rightabsSupport">
     </div>
     <div class="rightabs"></div>
+    <ng-template #loadingTemplate>
+        <mat-spinner diameter="24" color="orange" ></mat-spinner>
+    </ng-template>
 </div>

@@ -20,7 +20,6 @@ bootstrapApplication(AppComponent, {
 
 // Retrieve the role from sessionStorage
 type UserRole = 'admin' | 'super_admin' | 'member' | 'guest';
-const role: UserRole = (sessionStorage.getItem('userRole') as UserRole) || 'guest'; // Default to 'guest' if no role is found
 
 const endpoints = {
   "admin": [
@@ -44,5 +43,12 @@ const endpoints = {
   ],
   "guest": []
 };
-export const navItems = endpoints[role] || [];
+
+function getNavigationItems(): { label: string, icon: string, route: string }[] {
+  const role: UserRole = (sessionStorage.getItem('userRole') as UserRole) || 'guest'; // Default to 'guest' if no role is found
+  return endpoints[role] || [];
+}
+
+export const navItems = getNavigationItems();
+export { getNavigationItems };
 console.log(navItems);

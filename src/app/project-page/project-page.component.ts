@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -16,8 +16,9 @@ import { MembersListComponent } from '../members/members.component';
 import { FileListComponent } from '../files/files.component';
 import { SideNavComponent } from '../sidenav/sidenav.component';
 import { Router } from '@angular/router';
-import { navItems } from '../../main';
+import { navItems, getNavigationItems } from '../../main';
 import { BackendApisService } from '../backend-apis.service';
+import { AuthService } from '../auth.service';
 
 
 
@@ -76,7 +77,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 export class ProjectPageComponent implements OnInit{
   @ViewChild('addProjectDialog') addProjectDialog!: TemplateRef<any>;
   @Output() chatRequested = new EventEmitter<any>();
-  constructor(private dialog: MatDialog, private router: Router, private backendApisService: BackendApisService, private fb: FormBuilder) {
+  constructor(private dialog: MatDialog, private router: Router, private backendApisService: BackendApisService, private fb: FormBuilder, private  cdr: ChangeDetectorRef,  private authService: AuthService) {
     console.log('Project page loaded');
   }
   userRole: string = '';
@@ -116,6 +117,8 @@ export class ProjectPageComponent implements OnInit{
             company: response.user.b_name,
             profileImage: ''
           }
+          this.navItems = getNavigationItems(); // Update navigation items
+    this.cdr.detectChanges(); // Trigger change detection
           this.userRole = response.user.emp_role;
         } else {
           console.error('Failed to fetch projects');
@@ -199,8 +202,8 @@ export class ProjectPageComponent implements OnInit{
     this.chatRequested.emit(project);
   }
     user = {
-      name: 'John Doe',
-      company: 'Knowledge Bridge Corporation',
+      name: '',
+      company: '',
       profileImage: ''
     };
   
@@ -549,6 +552,7 @@ export class ProjectPageComponent implements OnInit{
     }
   
     logout() {
+      this.authService.clearUserData();  
       this.router.navigate(['/logout']);
     }
     openFileDetails(file: any) {

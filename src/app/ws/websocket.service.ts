@@ -10,7 +10,7 @@ export class WebsocketService {
 
   constructor() {}
 
-  connect(userId: string) {
+  connect(projectId: string) {
     if (this.socket) {
       this.socket.disconnect(); // Ensure no previous connection exists
     }
@@ -18,14 +18,14 @@ export class WebsocketService {
     const config: SocketIoConfig = {
       url: 'http://localhost:5000', // Flask WebSocket URL
       options: {
-        query: { userId: userId } // Pass userId to server
+        query: { projectId: projectId } // Pass projectId to server
       }
     };
 
     this.socket = new Socket(config);
 
     this.socket.on('connect', () => {
-      console.log('Connected to WebSocket with userId:', userId);
+      console.log('Connected to WebSocket with projectId:', projectId);
     });
 
     this.socket.on('disconnect', () => {

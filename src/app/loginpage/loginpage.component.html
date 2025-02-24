@@ -8,14 +8,20 @@
             <div class="form-group">
                 <input type="password" id="password" name="password" class="capsule-input" placeholder="Password" ngModel required>
             </div>
-            <button type="submit" class="capsule">Login</button>
+            <button type="submit" class="capsule" [disabled]="isLoading">
+                <ng-container *ngIf="!isLoading; else loadingTemplate" class="center">Login</ng-container>
+            </button>
         </form>
         <div class="separator"></div>
-        <button class="outlined" (click)="registerBusiness()">Register Business</button>
+        <button class="outlined" (click)="registerBusiness()">
+            Register Business
+        </button>
     </div>
     <div class="right"></div>
-    
-    <div class="rightabsSupport">
-    </div>
+    <div class="rightabsSupport"></div>
     <div class="rightabs"></div>
+
+    <ng-template #loadingTemplate>
+        <mat-spinner diameter="24" color="orange" ></mat-spinner>
+    </ng-template>
 </div>

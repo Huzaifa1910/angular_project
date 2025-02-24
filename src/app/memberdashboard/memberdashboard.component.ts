@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -19,9 +19,10 @@ import { Router } from '@angular/router';
 import { ChatComponent } from '../chatscreen/chatscreen.component';
 import { ChatbotService } from '../chatbot.service';
 import { ChatGuard } from '../chat.guard';
-import { navItems } from '../../main';
+import { navItems, getNavigationItems } from '../../main';
 import { ChatInitFormComponent } from '../chatinitformcomponent/chatinitformcomponent.component';
 import { BackendApisService } from '../backend-apis.service';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-dashboard-nav',
@@ -458,7 +459,7 @@ export class MemberdashboardComponent implements OnInit{
   isCollapsed = false;
   selectedRoute = '/dashboard';
   
-  constructor(private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService, private backendapisservice: BackendApisService) {
+  constructor(private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService, private backendapisservice: BackendApisService, private cdr: ChangeDetectorRef, private authService: AuthService) {
 
   }
   storageUsed = 0;
@@ -545,6 +546,8 @@ export class MemberdashboardComponent implements OnInit{
           company: response.business_data.user.b_name,
           profileImage: response.business_data.user.profile_image
         }
+        this.navItems = getNavigationItems(); // Update navigation items
+    this.cdr.detectChanges(); // Trigger change detection
         if (!response.business_data.new_projects) {
           console.warn('No new projects available.');
         }
@@ -564,8 +567,8 @@ export class MemberdashboardComponent implements OnInit{
     });
   }
   user = {
-    name: 'John Doe',
-    company: 'Knowledge Bridge Corporation',
+    name: '',
+    company: '',
     profileImage: ''
   };
 
@@ -834,6 +837,7 @@ export class MemberdashboardComponent implements OnInit{
     // Implement profile dialog
   }
   logout() {
+    this.authService.clearUserData();
     this.router.navigate(['/logout']);
   }
   openFileDetails(file: any) {

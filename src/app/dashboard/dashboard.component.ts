@@ -1,6 +1,6 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -19,7 +19,7 @@ import { SideNavComponent } from '../sidenav/sidenav.component';
 import { Router } from '@angular/router';
 import { ChatComponent } from '../chatscreen/chatscreen.component';
 import { ChatbotService } from '../chatbot.service';
-import { navItems } from '../../main';
+import { navItems, getNavigationItems } from '../../main';
 import { MatDialogContent } from '@angular/material/dialog';
 import { FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ChatInitFormComponent } from '../chatinitformcomponent/chatinitformcomponent.component';
@@ -28,6 +28,8 @@ import { FormBuilder } from '@angular/forms';
 import { BackendApisService } from '../backend-apis.service';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-dashboard-nav',
@@ -55,7 +57,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
     MatSelectModule,
     MatInputModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatProgressSpinnerModule,
+    NgIf
 
   ],
   providers: [
@@ -478,13 +482,19 @@ export class DashboardNavComponent implements OnInit{
   addMemberForm!: FormGroup;
   dialogRef!: MatDialogRef<any>;
   userRole: string = '';
-  constructor(private fb: FormBuilder, private backendapiservice: BackendApisService ,private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService) {
+  constructor(private fb: FormBuilder, private backendapiservice: BackendApisService ,private dialog: MatDialog, private router: Router, private chatbotService: ChatbotService, private cdr: ChangeDetectorRef,  private authService: AuthService) {
   }
   @ViewChild('sidenav') sidenav!: MatSidenav;
   isCollapsed = false;
   selectedRoute = '/dashboard';
-  
-  
+  user = {
+    name: '',
+    company: '',
+    profileImage: ''
+  }
+  recentFiles: { name: string; type: string; size: string; uploader: string; uploadDate: Date; project: string }[] = [];
+  projects: { id: any; name: string; leader: string; duration: string; startDate: Date; status: string }[] = [];
+  newMembers: { name: string; profileImage: string; addedBy: string; project: string; addedDate: Date; role: string }[] = [];
   getDataWithAuth() {
     this.backendapiservice.getDataWithAuth('/get_dashboard_data').subscribe((response: any) => {
       console.log('API response:', response);
@@ -495,7 +505,7 @@ export class DashboardNavComponent implements OnInit{
         var new_docs = [];
         // this.newMembers = response.business_data.new_employees || [];
         for(let i=0; i<response.business_data.new_employees.length; i++){
-          var memberData: { name: string; profileImage: string; addedBy: string; project: string; addedDate: Date, role: string } = {
+          var memberData: { name: string; profileImage: string; addedBy: string; project: string; addedDate: Date, role: string, emp_id?: string, emp_email?: string } = {
             name: '',
             profileImage: '',
             addedBy: '',
@@ -512,6 +522,9 @@ export class DashboardNavComponent implements OnInit{
           }
           memberData['addedDate'] = response.business_data.new_employees[i].created_at;
           memberData['role'] = response.business_data.new_employees[i].emp_role;
+          memberData['emp_id'] = response.business_data.new_employees[i].emp_id;
+          memberData['emp_email'] = response.business_data.new_employees[i].emp_email;
+
           new_members.push(memberData);
           // console.log(new_members);
         }
@@ -565,6 +578,8 @@ export class DashboardNavComponent implements OnInit{
           profileImage: response.business_data.user.profile_image
         }
         this.userRole = response.business_data.user.emp_role;
+        this.navItems = getNavigationItems(); // Update navigation items
+        this.cdr.detectChanges(); // Trigger change detection
         if (!response.business_data.new_projects) {
           console.warn('No new projects available.');
         }
@@ -584,134 +599,18 @@ export class DashboardNavComponent implements OnInit{
     });
   }
 
-  user = {
-    name: 'John Doe',
-    company: 'Knowledge Bridge Corporation',
-    profileImage: ''
-  };
+  // user = {
+  //   name: 'John Doe',
+  //   company: 'Knowledge Bridge Corporation',
+  //   profileImage: ''
+  // };
   storageUsed = 0;
   storageRemains = 0;
-  totalMembers = 24;
-  newMembersThisMonth = 3;
-  activeProjects = 15;
-  navItems = navItems;
+  totalMembers = 0;
+  newMembersThisMonth = 0;
+  activeProjects = 0;
+  navItems = getNavigationItems();
   
-  projects = [
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'Mobile App Redesign',
-      leader: 'Michael Chen',
-      duration: '3 Months',
-      startDate: new Date('2024-06-01'),
-      status: 'ongoing'
-    },
-    {
-      name: 'Mobile App Redesign',
-      leader: 'Michael Chen',
-      duration: '3 Months',
-      startDate: new Date('2024-02-01'),
-      status: 'ongoing'
-    },
-    {
-      name: 'Mobile App Redesign',
-      leader: 'Michael Chen',
-      duration: '3 Months',
-      startDate: new Date('2024-07-01'),
-      status: 'ongoing'
-    },
-    // Add more projects as needed
-  ];
-  recentFiles = [
-    {
-      name: 'Project-Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploader: 'Sarah Johnson',
-      uploadDate: new Date('2024-05-20'),
-    },
-    
-    {
-      name: 'Project-Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploader: 'Sarah Johnson',
-      uploadDate: new Date('2024-07-20'),
-    },
-    
-    {
-      name: 'Project-Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploader: 'Sarah Johnson',
-      uploadDate: new Date('2024-06-20'),
-    },
-    
-    {
-      name: 'Project-Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploader: 'Sarah Johnson',
-      uploadDate: new Date('2024-04-20'),
-    },
-    
-    {
-      name: 'Project-Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploader: 'Sarah Johnson',
-      uploadDate: new Date('2024-05-20'),
-    },
-    
-    // Add more files as needed
-  ];
   projectLeaders = [];
   projectOptions = [];
   get_all_projects(){
@@ -730,192 +629,6 @@ export class DashboardNavComponent implements OnInit{
       console.error('API error:', error);
     });
   }
-  newMembers = [
-    {
-      name: 'Emma Wilson',
-      profileImage: '',
-      addedBy: 'Sarah Johnson',
-      project: 'AI Chatbot Development',
-      addedDate: new Date('2024-05-20'),
-    },
-    {
-      name: 'David Lee',
-      profileImage: '',
-      addedBy: 'Michael Chen',
-      project: 'Mobile App Redesign',
-      addedDate: new Date('2024-05-19'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-      
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    // Add more members as needed
-  ];
   getFileIcon(fileType: string): string {
     const iconMap: {[key: string]: string} = {
       'pdf': 'picture_as_pdf',
@@ -1000,6 +713,7 @@ export class DashboardNavComponent implements OnInit{
     // Implement profile dialog
   }
   logout() {
+    this.authService.clearUserData();
     this.router.navigate(['/logout']);
   }
   openFileDetails(file: any) {
@@ -1118,6 +832,7 @@ submitAddProject(): void {
       if (response.success) {
         console.log('Project added successfully');
         let newProjectDetail = {
+          id: response.project_id, // Assuming the response contains the new project's ID
           name: newProject.projectName,
           leader: newProject.projectLeader,
           duration: newProject.projectDuration,
@@ -1150,9 +865,10 @@ submitAddMember(): void {
     let member_option = {
       'name': newMember.memberName,
       'profileImage': '', // Add this line
-      'addedBy': 'Huzaifa Ghori',
+      'addedBy': this.user.name,
       'project': newMember.projectName,
       'addedDate': new Date(),
+      'role': newMember.memberRole
     }
     this.newMembers.push(member_option);
     // this.closeAddProjectDialog();

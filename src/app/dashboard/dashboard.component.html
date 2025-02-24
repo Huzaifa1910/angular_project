@@ -1,6 +1,11 @@
 <div class="dashboardMainContainer">
-
-  <div class="sidenavContainer">
+  <ng-template #loading>
+    <div class="loading-screen">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  </ng-template>
+  <ng-template #bufferbar><mat-progress-bar mode="buffer"></mat-progress-bar></ng-template>
+  <div class="sidenavContainer"  *ngIf="user; else bufferbar">
     <app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
 (openProfile)="openProfile()"
 (logout)="logout()" 
@@ -8,7 +13,7 @@
     </app-sidenav>
   </div>
 
-  <div class="contentContainer">
+  <div class="contentContainer" *ngIf="projectLeaders; else loading">
         <!-- Dashboard Content -->
         <div class="dashboard-content">
           <!-- Stats Cards -->
@@ -140,7 +145,7 @@
           </ng-template>
           <app-projects-list 
             [projects]="projects"
-            title="Ongoing Projects"
+            title="Recent Projects"
             (projectSelected)="openProjectDetails($event)">
           </app-projects-list>
   
@@ -180,4 +185,5 @@
         </div>
           <ng-content></ng-content>
         </div>
+       
       </div>

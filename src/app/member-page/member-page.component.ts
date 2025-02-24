@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -15,9 +15,9 @@ import { MembersListComponent } from '../members/members.component';
 import { FileListComponent } from '../files/files.component';
 import { SideNavComponent } from '../sidenav/sidenav.component';
 import { Router } from '@angular/router';
-import { navItems } from '../../main';
+import { navItems, getNavigationItems } from '../../main';
 import { BackendApisService } from '../backend-apis.service';
-
+import { AuthService } from '../auth.service';
 
 
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -47,8 +47,8 @@ export class MemberPageComponent implements OnInit {
   addMemberForm!: FormGroup;
   projectOptions = [];
   user = {
-    name: 'John Doe',
-    company: 'Knowledge Bridge Corporation',
+    name: '',
+    company: '',
     profileImage: ''
   };
   get_all_projects(){
@@ -68,122 +68,7 @@ export class MemberPageComponent implements OnInit {
     });
   }
   navItems = navItems;
-  projects = [
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'AI Chatbot Development',
-      leader: 'Sarah Johnson',
-      duration: '6 Months',
-      startDate: new Date('2024-07-15'),
-      status: 'ongoing'
-    },
-    {
-      name: 'Mobile App Redesign',
-      leader: 'Michael Chen',
-      duration: '3 Months',
-      startDate: new Date('2024-06-01'),
-      status: 'ongoing'
-    },
-    {
-      name: 'Mobile App Redesign',
-      leader: 'Michael Chen',
-      duration: '3 Months',
-      startDate: new Date('2024-02-01'),
-      status: 'ongoing'
-    },
-    {
-      name: 'Mobile App Redesign',
-      leader: 'Michael Chen',
-      duration: '3 Months',
-      startDate: new Date('2024-07-01'),
-      status: 'ongoing'
-    },
-    // Add more projects as needed
-  ];
-  recentFiles = [
-    {
-      name: 'Project-Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploader: 'Sarah Johnson',
-      uploadDate: new Date('2024-05-20'),
-    },
-    
-    {
-      name: 'Project-Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploader: 'Sarah Johnson',
-      uploadDate: new Date('2024-07-20'),
-    },
-    
-    {
-      name: 'Project-Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploader: 'Sarah Johnson',
-      uploadDate: new Date('2024-06-20'),
-    },
-    
-    {
-      name: 'Project-Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploader: 'Sarah Johnson',
-      uploadDate: new Date('2024-04-20'),
-    },
-    
-    {
-      name: 'Project-Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploader: 'Sarah Johnson',
-      uploadDate: new Date('2024-05-20'),
-    },
-    
-    // Add more files as needed
-  ];
+ 
   newMembers = [
     {
       name: 'Emma Wilson',
@@ -199,160 +84,7 @@ export class MemberPageComponent implements OnInit {
       project: 'Mobile App Redesign',
       addedDate: new Date('2024-05-19'),
     },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
-    {
-      name: 'Sophia Martinez',
-      profileImage: '',
-      addedBy: 'Alex Thompson',
-      project: 'Cloud Migration',
-      addedDate: new Date('2024-05-18'),
-    },
+    
     // Add more members as needed
   ];
   getFileIcon(fileType: string): string {
@@ -369,9 +101,7 @@ export class MemberPageComponent implements OnInit {
 
   // Add this to sort files by date
   ngOnInit() {
-    this.recentFiles.sort((a, b) => 
-      b.uploadDate.getTime() - a.uploadDate.getTime()
-    );
+   
     this.addMemberForm = this.fb.group({
       
       memberName: ['', Validators.required],
@@ -404,6 +134,7 @@ export class MemberPageComponent implements OnInit {
   }
 
   logout() {
+    this.authService.clearUserData();
     this.router.navigate(['/logout']);
   }
   openFileDetails(file: any) {
@@ -414,7 +145,7 @@ export class MemberPageComponent implements OnInit {
     // Handle menu actions
     console.log('Menu action:', event.action, 'on file:', event.file);
   }
-  constructor(private dialog: MatDialog, private router: Router, private backendapisService: BackendApisService, private fb: FormBuilder) { 
+  constructor(private dialog: MatDialog, private router: Router, private backendapisService: BackendApisService, private fb: FormBuilder, private cdr: ChangeDetectorRef,  private authService: AuthService) { 
 
   }
 
@@ -426,7 +157,7 @@ export class MemberPageComponent implements OnInit {
         if (response.success) {
           var new_members = [];
           for(let i=0; i<response.employees.length; i++){
-            var memberData: { name: string; profileImage: string; addedBy: string; project: string; addedDate: Date, role: string } = {
+            var memberData: { name: string; profileImage: string; addedBy: string; project: string; addedDate: Date, role: string, emp_id?: string, emp_email?: string } = {
               name: '',
               profileImage: '',
               addedBy: '',
@@ -440,6 +171,8 @@ export class MemberPageComponent implements OnInit {
             memberData['project'] = response.employees[i].p_name;
             memberData['addedDate'] = response.employees[i].created_at;
             memberData['role'] = response.employees[i].emp_role;
+            memberData['emp_id'] = response.employees[i].emp_id;
+            memberData['emp_email'] = response.employees[i].emp_email;
             new_members.push(memberData);
             // console.log(new_members);
           }
@@ -450,6 +183,8 @@ export class MemberPageComponent implements OnInit {
             profileImage: ''
             
           }
+          this.navItems = getNavigationItems(); // Update navigation items
+          this.cdr.detectChanges(); // Trigger change detection
           console.log('Employees:', response.employees);
           // this.newMembers = response.employees;
         } else {
@@ -463,24 +198,7 @@ export class MemberPageComponent implements OnInit {
       }
     });
   }
-  openProjectDetails(project: any): void {
-    // You would typically fetch real data here
-    const dialogData = {
-      project: project,
-      team: [
-        { name: 'Sarah Johnson', role: 'Project Lead', profileImage: '' },
-        { name: 'Michael Chen', role: 'Developer', profileImage: '' },
-        { name: 'Emma Wilson', role: 'Designer', profileImage: '' }
-      ],
-      documents: this.recentFiles.filter(f => f.type === 'pdf') // Example filter
-    };
   
-    this.dialog.open(ProjectDetailComponent, {
-      width: '90%',
-      maxWidth: '800px',
-      data: dialogData
-    });
-  }
   closeAddMemberDialog(): void {
     this.dialog.closeAll();
   }
