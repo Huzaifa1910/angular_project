@@ -1,0 +1,18 @@
+/* ...existing styles... */
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.edit-form mat-form-field {
+  width: 100%;
+}
+
+.edit-form [mat-dialog-actions] {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}

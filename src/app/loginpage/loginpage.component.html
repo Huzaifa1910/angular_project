@@ -9,7 +9,7 @@
                 <input type="password" id="password" name="password" class="capsule-input" placeholder="Password" ngModel required>
             </div>
             <button type="submit" class="capsule" [disabled]="isLoading">
-                <ng-container *ngIf="!isLoading; else loadingTemplate" class="center">Login</ng-container>
+                <ng-container *ngIf="!isLoading; else loadingTemplate">Login</ng-container>
             </button>
         </form>
         <div class="separator"></div>
@@ -22,6 +22,6 @@
     <div class="rightabs"></div>
 
     <ng-template #loadingTemplate>
-        <mat-spinner diameter="24" color="orange" ></mat-spinner>
+        <mat-spinner diameter="24" color="accent" [style.color]="'white'"></mat-spinner>
     </ng-template>
 </div>

@@ -63,8 +63,8 @@ import { BackendApisService } from '../backend-apis.service';
     </div>
 
     <ng-template #editDialog let-data>
-      <h2>Edit Member</h2>
-      <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+      <h2 mat-dialog-title class="mx-auto" style="margin: 20px auto;">Edit Member</h2>
+      <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="edit-form">
         <mat-form-field>
           <mat-label>Name</mat-label>
           <input matInput formControlName="name" [disabled]="true">
@@ -82,8 +82,10 @@ import { BackendApisService } from '../backend-apis.service';
             <mat-option value="member">Member</mat-option>
           </mat-select>
         </mat-form-field>
-        <button mat-button type="submit">Save</button>
-        <button mat-button type="button" (click)="closeDialog()">Close</button>
+        <div mat-dialog-actions>
+          <button mat-button type="submit">Save</button>
+          <button mat-button type="button" (click)="closeDialog()">Close</button>
+        </div>
       </form>
     </ng-template>
   `,
@@ -134,6 +136,23 @@ import { BackendApisService } from '../backend-apis.service';
           height: 20px;
         }
       }
+    }
+
+    .edit-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .edit-form mat-form-field {
+      width: 100%;
+    }
+
+    .edit-form [mat-dialog-actions] {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
     }
   `]
 })

@@ -2,71 +2,63 @@
 
   <div class="sidenavContainer">
     <app-sidenav [navItems]="navItems" (navigate)="onNavigate($event)"
-(openProfile)="openProfile()"
-(logout)="logout()" 
-    [user]="user">
-    
-</app-sidenav>
-</div>
+      (openProfile)="openProfile()"
+      (logout)="logout()" 
+      [user]="user">
+    </app-sidenav>  
+  </div>
 
-<div class="contentContainer">
-<div class="profile-container full-page">
-    <div class="first-container profile-card">
+  <div class="contentContainer">
+    <div class="profile-container full-page">
+      <div class="first-container profile-card">
         <div class="profile-header">
-            <div class="profile-picture">
-                <img src="default-profile.jpeg" alt="Profile Picture">
-            </div>
-            <div class="profile-info">
-                <div class="profile-name">{{ data.user.name }}</div>
-                <div class="profile-role">{{ data.user.role }}</div>
-            </div>
+          <div class="profile-picture">
+            <img src="default-profile.jpeg" alt="Profile Picture">
+          </div>
+          <div class="profile-info">
+            <div class="profile-name">{{ data.user.name }}</div>
+            <div class="profile-role">{{ data.user.role }}</div>
+          </div>
         </div>
         <div class="profile-meta">
-            <div class="meta-item">
-                <mat-icon>email</mat-icon>
-                <span>{{ data.user.email }}</span>
-            </div>
-            <div class="meta-item">
-                <mat-icon>house</mat-icon>
-                <span>{{ data.user.company }}</span>
-            </div>
-            <!-- Add more meta items as needed -->
+          <div class="meta-item">
+            <mat-icon>email</mat-icon>
+            <span>{{ data.user.email }}</span>
+          </div>
+          <div class="meta-item">
+            <mat-icon>house</mat-icon>
+            <span>{{ data.user.company }}</span>
+          </div>
+          <!-- Add more meta items as needed -->
         </div>
-    </div>
-    <div class="second-container profile-card">
-        <app-projects-list 
-            [projects]="projects"
-            title="Assigned Projects"
-            (projectSelected)="openProjectDetails($event)">
-          </app-projects-list>
-    </div>
-    <div class="profile-container">
-      <button mat-button (click)="openChangePasswordDialog()">Change Password</button>
+      </div>
+      <div class="profile-container">
+        <button mat-button (click)="openChangePasswordDialog()">Change Password</button>
 
-      <ng-template #changePasswordDialog>
-        <h2 mat-dialog-title>Change Password</h2>
-        <mat-dialog-content>
-          <form [formGroup]="changePasswordForm" (ngSubmit)="submitChangePassword()">
-            <mat-form-field>
-              <mat-label>Current Password</mat-label>
-              <input matInput type="password" formControlName="currentPassword" required>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>New Password</mat-label>
-              <input matInput type="password" formControlName="newPassword" required>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>Confirm New Password</mat-label>
-              <input matInput type="password" formControlName="confirmNewPassword" required>
-            </mat-form-field>
-            <div mat-dialog-actions>
-              <button mat-button type="button" (click)="dialogRef.close()">Cancel</button>
-              <button mat-button type="submit">Change Password</button>
-            </div>
-          </form>
-        </mat-dialog-content>
-      </ng-template>
+        <ng-template #changePasswordDialog>
+          <h2 mat-dialog-title>Change Password</h2>
+          <mat-dialog-content>
+            <form [formGroup]="changePasswordForm" (ngSubmit)="submitChangePassword()" class="change-password-form">
+              <mat-form-field>
+                <mat-label>Current Password</mat-label>
+                <input matInput type="password" formControlName="currentPassword" required>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>New Password</mat-label>
+                <input matInput type="password" formControlName="newPassword" required>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Confirm New Password</mat-label>
+                <input matInput type="password" formControlName="confirmNewPassword" required>
+              </mat-form-field>
+              <div mat-dialog-actions>
+                <button mat-button type="button" (click)="dialogRef.close()">Cancel</button>
+                <button mat-button type="submit">Change Password</button>
+              </div>
+            </form>
+          </mat-dialog-content>
+        </ng-template>
+      </div>
     </div>
-</div>
-</div>
+  </div>
 </div>

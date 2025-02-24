@@ -141,3 +141,20 @@
   overflow-y: auto;
   padding: 24px;
 }
+
+.change-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.change-password-form mat-form-field {
+  width: 100%;
+}
+
+.change-password-form [mat-dialog-actions] {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
